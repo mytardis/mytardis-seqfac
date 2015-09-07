@@ -58,3 +58,4 @@ target/
 
 # GitEye files
 .idea
+/.project
