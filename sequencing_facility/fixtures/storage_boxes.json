@@ -1,0 +1,101 @@
+[
+  {
+    "fields": {
+      "status": "online",
+      "description": "Default Storage",
+      "django_storage_class": "tardis.tardis_portal.storage.MyTardisLocalFileSystemStorage",
+      "max_size": 703138037760,
+      "master_box": null,
+      "name": "default"
+    },
+    "model": "tardis_portal.storagebox",
+    "pk": 1
+  },
+  {
+    "fields": {
+      "status": "online",
+      "description": "Immediately Available Storage (not on tape)",
+      "django_storage_class": "tardis.tardis_portal.storage.MyTardisLocalFileSystemStorage",
+      "max_size": 1000000000,
+      "master_box": null,
+      "name": "live"
+    },
+    "model": "tardis_portal.storagebox",
+    "pk": 3
+  },
+  {
+    "fields": {
+      "status": "online",
+      "description": "Vault Storage (tape with disk cache)",
+      "django_storage_class": "tardis.tardis_portal.storage.MyTardisLocalFileSystemStorage",
+      "max_size": 703138037760,
+      "master_box": null,
+      "name": "vault"
+    },
+    "model": "tardis_portal.storagebox",
+    "pk": 4
+  },
+  {
+    "fields": {
+      "status": "online",
+      "description": "Test data",
+      "django_storage_class": "tardis.tardis_portal.storage.MyTardisLocalFileSystemStorage",
+      "max_size": 1548053708,
+      "master_box": null,
+      "name": "test"
+    },
+    "model": "tardis_portal.storagebox",
+    "pk": 5
+  },
+
+
+
+  {
+    "fields": {
+      "value": "/srv/sonas/mhtp/market/",
+      "key": "location",
+      "storage_box": 1
+    },
+    "model": "tardis_portal.storageboxoption",
+    "pk": 1
+  },
+  {
+    "fields": {
+      "value": "/data/cached",
+      "key": "location",
+      "storage_box": 3
+    },
+    "model": "tardis_portal.storageboxoption",
+    "pk": 3
+  },
+  {
+    "fields": {
+      "value": "/srv/sonas/mhtp/vault/",
+      "key": "location",
+      "storage_box": 4
+    },
+    "model": "tardis_portal.storageboxoption",
+    "pk": 4
+  },
+  {
+    "fields": {
+      "value": "/data/illumina/",
+      "key": "location",
+      "storage_box": 5
+    },
+    "model": "tardis_portal.storageboxoption",
+    "pk": 5
+  },
+
+
+
+  {
+    "fields": {
+      "value": "tape",
+      "key": "type",
+      "storage_box": 4
+    },
+    "model": "tardis_portal.storageboxattribute",
+    "pk": 3
+  }
+]
