@@ -1,0 +1,21 @@
+{% load humanize %}
+<table class="parameter_table table table-striped table-bordered">
+    <thead>
+    <tr>
+        {% for thead in sample_stats_table.thead %}
+            <th>{{ thead }}</th>
+        {% endfor %}
+    </tr>
+    </thead>
+    <tbody>
+    {% for trow in sample_stats_table.tbody %}
+        <tr>
+            {% for cell in trow %}
+                <td>
+                    {{ cell|intcomma }}
+                </td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

@@ -1,0 +1,117 @@
+
+<table id="fastqc_summary_table"
+       class="table table-condensed table-striped"
+       data-toggle="table"
+       data-language="en-US"
+       width="90%"
+       data-search="true"
+       data-show-toggle="true"
+{#       data-show-columns="true"#}
+       data-buttons-align="left"
+       data-search-align="left">
+
+{#         data-pagination="true"#}
+{#         data-page-size="100">#}
+
+    <thead>
+    <tr>
+        <th data-field="sample_name"
+            class="col-xs-1"
+            id="sample_name"
+            data-switchable="false"
+            data-visible="true"
+            data-height="500">
+            Sample
+        </th>
+        {% for field_id, description in fastqc_table_headers %}
+        <th data-field="{{ field_id }}"
+            class="col-xs-1 fastqc_summary_table_col"
+            id="{{ field_id }}"
+            data-switchable="false"
+            data-visible="true"
+            data-align="center"
+            data-cell-style="fastqcSummaryCellStyle"
+            data-formatter="fastqcTestFormatter">
+            <span
+             data-toggle="tooltip"
+             title="{{ description }}">
+                {{ description }}
+            </span>
+        </th>
+        {% endfor %}
+    </tr>
+    </thead>
+
+</table>
+
+<script type="text/javascript">
+    "use strict";
+    var fastqc_table_data = {{ fastqc_table_json | safe }};
+    var $fastqc_summary_table = $('#fastqc_summary_table');
+
+    $(function () {
+        $fastqc_summary_table.bootstrapTable({
+            data: fastqc_table_data
+        });
+    });
+
+    function strContains(str, subStr) {
+        return str.indexOf(subStr) > -1;
+    }
+
+    function fastqcSummaryCellStyle(value, row, index) {
+        // var classes = ['active', 'success', 'info', 'warning', 'danger'];
+
+        var v;
+        v = value.trim();
+
+        if (strContains(v, 'PASS')) {
+            return {
+                classes: 'success'
+            };
+        }
+        if (strContains(v, 'WARN')) {
+            return {
+                classes: 'warning'
+            };
+        }
+        if (strContains(v, 'FAIL')) {
+            return {
+                classes: 'danger'
+            };
+        }
+        return {};
+    }
+
+    function fastqcTestFormatter(value) {
+
+        var v;
+        v = value.trim();
+
+        if (strContains(v, 'PASS')) {
+            var icon = '<i class="icon-ok" style="color:#5eb95e;font-size:200%;"></i>';
+            //var icon = '<span class="label label-success">PASS</span>';
+            var el = $('<a></a>');
+            el.html(v);
+            $('a', el).html(icon);
+            return el.html();
+        }
+        if (strContains(v, 'WARN')) {
+            var icon = '<i class="icon-warning-sign" style="color:#faa732;font-size:200%;"></i>';
+            //var icon = '<span class="label label-warning">WARN</span>';
+            var el = $('<a></a>');
+            el.html(v);
+            $('a', el).html(icon);
+            return el.html();
+        }
+        if (strContains(v, 'FAIL')) {
+            var icon = '<i class="icon-remove-sign" style="color:#dd514c;font-size:200%;"></i>';
+            //var icon = '<span class="label label-important">FAIL</span>';
+            var el = $('<a></a>');
+            el.html(v);
+            $('a', el).html(icon);
+            return el.html();
+        }
+        return v;
+    }
+</script>

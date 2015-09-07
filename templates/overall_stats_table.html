@@ -1,0 +1,25 @@
+{% load humanize %}
+<table class="parameter_table table table-striped table-bordered">
+<tbody>
+<tr><td><strong>Total reads (all samples)</strong></td>
+    <td>{{ overall_stats.total_reads|intword }} ({{ overall_stats.total_reads|intcomma }})</td></tr>
+<tr><td><strong>Read length</strong></td>
+    <td>{{ overall_stats.read_length_mean|floatformat }}
+    {% if  overall_stats.read_length_stddev %}
+    &plusmn; {{ overall_stats.read_length_stddev|floatformat }}
+    {% endif %}
+    </td>
+</tr>
+{% if overall_stats.gc_mean %}
+<tr>
+    <td><strong>Mean % GC content</strong></td>
+    <td>{{ overall_stats.gc_mean|floatformat }}
+    {% if overall_stats.gc_mean %}
+    &plusmn; {{ overall_stats.gc_stddev|floatformat }}
+    {% endif %}
+    </td>
+</tr>
+{% endif %}
+</tbody>
+</table>
+<small><em>&plusmn; values show one standard deviation.</em></small>

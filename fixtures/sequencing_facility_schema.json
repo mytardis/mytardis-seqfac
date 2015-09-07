@@ -1,0 +1,1164 @@
+[
+  {
+    "pk": null,
+    "model": "tardis_portal.schema",
+    "fields": {
+      "name": "Illumina Sequencing Run",
+      "namespace": "http://www.tardis.edu.au/schemas/ngs/run/illumina",
+      "subtype": "illumina-sequencing-run",
+      "hidden": false,
+      "type": 1,
+      "immutable": true
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.schema",
+    "fields": {
+      "name": "Sequencing Project (Demultiplexed Sample Set)",
+      "namespace": "http://www.tardis.edu.au/schemas/ngs/project",
+      "subtype": "demultiplexed-samples",
+      "hidden": false,
+      "type": 1,
+      "immutable": true
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.schema",
+    "fields": {
+      "name": "Nucleotide Sequencing Project Raw Reads",
+      "namespace": "http://www.tardis.edu.au/schemas/ngs/project/raw_reads",
+      "subtype": "nucleotide-raw-reads-dataset",
+      "hidden": false,
+      "type": 2,
+      "immutable": true
+    }
+  },
+    {
+    "pk": null,
+    "model": "tardis_portal.schema",
+    "fields": {
+      "name": "FastQC Reports",
+      "namespace": "http://www.tardis.edu.au/schemas/ngs/project/fastqc",
+      "subtype": "fastqc-reports",
+      "hidden": false,
+      "type": 2,
+      "immutable": true
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.schema",
+    "fields": {
+      "name": "FastQC Project Summary",
+      "namespace": "http://www.tardis.edu.au/schemas/ngs/project/hidden_fastqc_summary",
+      "subtype": "hidden-fastqc-project-summary",
+      "hidden": true,
+      "type": 2,
+      "immutable": true
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.schema",
+    "fields": {
+      "name": "Nucleotide Sequence Raw Reads (FASTQ)",
+      "namespace": "http://www.tardis.edu.au/schemas/ngs/file/fastq",
+      "subtype": "fastq-raw-reads",
+      "hidden": false,
+      "type": 3,
+      "immutable": true
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.schema",
+    "fields": {
+      "name": "FastQC report",
+      "namespace": "http://www.tardis.edu.au/schemas/ngs/file/fastqc",
+      "subtype": "fastqc-output",
+      "hidden": false,
+      "type": 3,
+      "immutable": true
+    }
+  },
+
+
+
+
+
+
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "run_id",
+      "data_type": 2,
+      "is_searchable": true,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Run Unique ID",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/run/illumina"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "run_number",
+      "data_type": 1,
+      "is_searchable": true,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Run number",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/run/illumina"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "flowcell_id",
+      "data_type": 2,
+      "is_searchable": true,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Flowcell ID",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/run/illumina"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "instrument_id",
+      "data_type": 2,
+      "is_searchable": true,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Instrument ID",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/run/illumina"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "instrument_model",
+      "data_type": 2,
+      "is_searchable": true,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Instrument model",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/run/illumina"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "read_cycles",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Number of cycles in each read [index reads in (brackets)]",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/run/illumina"
+      ]
+    }
+  },
+    {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "chemistry",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Terminator chemistry",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/run/illumina"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "operator_name",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Instrument operator",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/run/illumina"
+      ]
+    }
+  },
+ {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "rta_version",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Illumina RTA version",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/run/illumina"
+      ]
+    }
+  },
+ {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "ingestor_useragent",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Ingestor User Agent",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/run/illumina"
+      ]
+    }
+  },
+
+
+
+
+   {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "run_id",
+      "data_type": 2,
+      "is_searchable": true,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Run Unique ID",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "run_experiment",
+      "data_type": 4,
+      "is_searchable": true,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Run Experiment link",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "run_number",
+      "data_type": 1,
+      "is_searchable": true,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Run number",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "flowcell_id",
+      "data_type": 2,
+      "is_searchable": true,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Flowcell ID",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "instrument_id",
+      "data_type": 2,
+      "is_searchable": true,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Instrument ID",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "instrument_model",
+      "data_type": 2,
+      "is_searchable": true,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Instrument model",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "read_cycles",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Number of cycles in each read [index reads in (brackets)]",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project"
+      ]
+    }
+  },
+    {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "chemistry",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Terminator chemistry",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "operator_name",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Instrument operator",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project"
+      ]
+    }
+  },
+ {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "rta_version",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Illumina RTA version",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project"
+      ]
+    }
+  },
+ {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "ingestor_useragent",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Ingestor User Agent",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project"
+      ]
+    }
+  },
+
+
+
+
+
+   {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "run_id",
+      "data_type": 2,
+      "is_searchable": true,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Run Unique ID",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project/raw_reads"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "project_experiment",
+      "data_type": 4,
+      "is_searchable": true,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Project Experiment link",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project/raw_reads"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "run_experiment",
+      "data_type": 4,
+      "is_searchable": true,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Run Experiment link",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project/raw_reads"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "fastqc_dataset",
+      "data_type": 4,
+      "is_searchable": true,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Associated FastQC reports",
+      "units": "",
+      "order": 9999,
+      "immutable": false,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project/raw_reads"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "run_number",
+      "data_type": 1,
+      "is_searchable": true,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Run number",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project/raw_reads"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "flowcell_id",
+      "data_type": 2,
+      "is_searchable": true,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Flowcell ID",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project/raw_reads"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "instrument_id",
+      "data_type": 2,
+      "is_searchable": true,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Instrument ID",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project/raw_reads"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "instrument_model",
+      "data_type": 2,
+      "is_searchable": true,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Instrument model",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project/raw_reads"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "read_cycles",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Number of cycles in each read [index reads in (brackets)]",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project/raw_reads"
+      ]
+    }
+  },
+    {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "chemistry",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Terminator chemistry",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project/raw_reads"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "operator_name",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Instrument operator",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project/raw_reads"
+      ]
+    }
+  },
+ {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "rta_version",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Illumina RTA version",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project/raw_reads"
+      ]
+    }
+  },
+
+
+
+
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "run_id",
+      "data_type": 2,
+      "is_searchable": true,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Run Unique ID",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project/fastqc"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "project",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Project name",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project/fastqc"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "raw_reads_dataset",
+      "data_type": 4,
+      "is_searchable": true,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Raw reads project link",
+      "units": "",
+      "order": 9999,
+      "immutable": false,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project/fastqc"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "fastqc_version",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "FastQC software version",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project/fastqc"
+      ]
+    }
+  },
+
+
+
+
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "hidden_fastqc_summary_json",
+      "data_type": 8,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "(Hidden) FastQC summary for all samples (JSON)",
+      "units": "fastqc-summary-table",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project/hidden_fastqc_summary"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "fastqc_version",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "FastQC software version",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project/hidden_fastqc_summary"
+      ]
+    }
+  },
+
+
+
+
+
+
+
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "run_id",
+      "data_type": 2,
+      "is_searchable": true,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Run Unique ID",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/file/fastq"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "sample_id",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Sample ID",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/file/fastq"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "sample_name",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Sample name",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/file/fastq"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "lane",
+      "data_type": 1,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Lane",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/file/fastq"
+      ]
+    }
+  },
+    {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "read",
+      "data_type": 1,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Read number",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/file/fastq"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "reference_genome",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Reference genome",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/file/fastq"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "index_sequence",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Index sequence (barcode) for this sample",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/file/fastq"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "is_control",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Is control ?",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/file/fastq"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "recipe",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Recipe",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/file/fastq"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "operator_name",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Instrument Operator",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/file/fastq"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "description",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Description",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/file/fastq"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "project",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Project name",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/file/fastq"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "number_of_reads",
+      "data_type": 1,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Number of reads",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/file/fastq"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "number_of_poor_quality_reads",
+      "data_type": 1,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Number of reads flagged as poor quality (FastQC)",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/file/fastq"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "read_length",
+      "data_type": 1,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Read length",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/file/fastq"
+      ]
+    }
+  },
+
+
+
+
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "run_id",
+      "data_type": 2,
+      "is_searchable": true,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Run Unique ID",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/file/fastqc"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "sample_id",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Sample ID",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/file/fastqc"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "project",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Project name",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/file/fastqc"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "name": "fastqc_version",
+      "data_type": 2,
+      "is_searchable": false,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "FastQC software version",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/file/fastqc"
+      ]
+    }
+  }
+]
