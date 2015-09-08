@@ -47,8 +47,20 @@
     "model": "tardis_portal.storagebox",
     "pk": 5
   },
+  {
+    "fields": {
+      "status": "online",
+      "description": "NeCTAR Object Storage (S3 API)",
+      "django_storage_class": "storages.backends.s3boto.S3BotoStorage",
+      "max_size": 1000000000,
+      "master_box": null,
+      "name": "object_store"
+    },
+    "model": "tardis_portal.storagebox",
+    "pk": 6
+  },
 
-
+  
 
   {
     "fields": {
@@ -85,6 +97,33 @@
     },
     "model": "tardis_portal.storageboxoption",
     "pk": 5
+  },
+  {
+    "fields": {
+      "value": "AWS_ACCESS_KEY_ID",
+      "key": "access_key",
+      "storage_box": 6
+    },
+    "model": "tardis_portal.storageboxoption",
+    "pk": 7
+  },
+  {
+    "fields": {
+      "value": "AWS_SECRET_ACCESS_KEY",
+      "key": "secret_key",
+      "storage_box": 6
+    },
+    "model": "tardis_portal.storageboxoption",
+    "pk": 8
+  },
+  {
+    "fields": {
+      "value": "sequencing_facility",
+      "key": "bucket_name",
+      "storage_box": 6
+    },
+    "model": "tardis_portal.storageboxoption",
+    "pk": 9
   },
 
 

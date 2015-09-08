@@ -1,1 +1,3 @@
 numpy
+boto
+-e hg+https://bitbucket.org/david/django-storages#egg=django-storages
