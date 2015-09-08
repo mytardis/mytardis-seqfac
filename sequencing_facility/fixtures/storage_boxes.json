@@ -60,7 +60,7 @@
     "pk": 6
   },
 
-  
+
 
   {
     "fields": {
@@ -125,7 +125,34 @@
     "model": "tardis_portal.storageboxoption",
     "pk": 9
   },
-
+  {
+    "fields": {
+      "value": "8888",
+      "key": "port",
+      "storage_box": 6
+    },
+    "model": "tardis_portal.storageboxoption",
+    "pk": 13
+  },
+  {
+    "fields": {
+      "value": "swift.rc.nectar.org.au",
+      "key": "host",
+      "storage_box": 6
+    },
+    "model": "tardis_portal.storageboxoption",
+    "pk": 14
+  },
+  {
+    "fields": {
+      "value": "boto.s3.connection.OrdinaryCallingFormat",
+      "key": "calling_format",
+      "storage_box": 6
+    },
+    "model": "tardis_portal.storageboxoption",
+    "pk": 15
+  },
+  
 
 
   {
