@@ -201,15 +201,20 @@ def _format_read_number_summary(fastqc_summary):
 @authz.dataset_access_required
 def view_fastqc_report(request, dataset_id, filename):
 
-    subtype = 'nucleotide-raw-reads'
     dataset = Dataset.objects.get(id=dataset_id)
     fastqc_dataset_id = dataset_id
-    # If we are handed a dataset_id for a FASTQ project rather than
+
+    # If we are handed a dataset_id for a FASTQ project (which contains a
+    # ParameterSet of subtype 'nucleotide-raw-reads-dataset') rather than
     # a FastQC dataset, we resolve the linked FastQC dataset
-    param_set = _get_paramset_by_subtype(dataset, subtype)
+    fq_dataset_subtype = 'nucleotide-raw-reads-dataset'
+    param_set = _get_paramset_by_subtype(dataset, fq_dataset_subtype)
     if param_set:
         fastqc_link = param_set.get_param('fastqc_dataset')
-        fastqc_dataset_id = fastqc_link.link_url.split('/')[2]
+        if fastqc_link.link_id:
+            fastqc_dataset_id = fastqc_link.link_id
+        else:
+            fastqc_dataset_id = fastqc_link.link_url.split('/')[2]
 
     datafile = DataFile.objects.filter(filename__exact=filename,
                                        dataset__id=fastqc_dataset_id).get()
