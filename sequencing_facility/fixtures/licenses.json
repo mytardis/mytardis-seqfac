@@ -1,0 +1,38 @@
+[
+  {
+    "fields": {
+      "name": "MOCK EXAMPLE Clinical-Only Data License",
+      "url": "http://genomicsandhealth.org/framework",
+      "is_active": true,
+      "allows_distribution": false,
+      "internal_description": "Use of this data and associated metadata is subject to the MOCK EXAMPLE Clinical-Only Data License.\r\n\r\nThis data is private and confidential, and is intended ONLY to be used for clinical diagnostic purposes by authorized persons. It must not be shared publicly, or with those not authorized to access it. Use of the data and/or metadata restricted to the purposes detailed by a donor consent policy.\r\n\r\nSerious criminal and/or civil penalties my apply for misuse or unintended disclosure of this data and/or metadata.",
+      "image_url": ""
+    },
+    "model": "tardis_portal.license",
+    "pk": 7
+  },
+  {
+    "fields": {
+      "name": "MOCK EXAMPLE Research Data License",
+      "url": "http://www.reddit.com/r/CatsInSinks",
+      "is_active": true,
+      "allows_distribution": false,
+      "internal_description": "Use of this data and associated metadata is subject to the MOCK EXAMPLE Research Data License.\r\n\r\nThis data and/or metadata is NOT associated with a human subject and is NOT subject to a donor consent policy. It can be shared with the consent of the data owner(s).\r\n\r\nThis data and metadata may be covered by an additional appropriate licence (eg CC-BY).",
+      "image_url": ""
+    },
+    "model": "tardis_portal.license",
+    "pk": 8
+  },
+  {
+    "fields": {
+      "name": "MOCK EXAMPLE Clinical-Research Dual-Use Data License",
+      "url": "https://www.reddit.com/r/woahdude",
+      "is_active": true,
+      "allows_distribution": false,
+      "internal_description": "Use of this data and associated metadata is subject to the MOCK EXAMPLE Clinical-Research Dual-Use Data License.\r\n\r\nThis data is private and confidential. It must not be shared publicly, or with those not authorized to access it. Use of the data and/or metadata restricted to the purposes detailed by a donor consent policy.\r\n\r\nSerious criminal and/or civil penalties my apply for misuse or unintended disclosure of this data and/or metadata.",
+      "image_url": ""
+    },
+    "model": "tardis_portal.license",
+    "pk": 9
+  }
+]
