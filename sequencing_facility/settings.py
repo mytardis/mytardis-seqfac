@@ -1,10 +1,11 @@
 NAME = 'Sequencing Facility'
 
-DATASET_VIEWS = [('http://www.tardis.edu.au/schemas/ngs/project/raw_reads',
-                  'tardis.apps.sequencing_facility.views.view_project_dataset'),
-                 ('http://www.tardis.edu.au/schemas/ngs/project/fastqc',
-                  'tardis.apps.sequencing_facility.views.view_project_dataset')
-                ]
+DATASET_VIEWS = [
+    ('http://www.tardis.edu.au/schemas/ngs/project/raw_reads',
+     'tardis.apps.sequencing_facility.views.view_fastq_dataset'),
+    ('http://www.tardis.edu.au/schemas/ngs/project/fastqc',
+     'tardis.apps.sequencing_facility.views.view_fastqc_reports_dataset')
+]
 
 SITE_TITLE = "Sequencing Facility"
 

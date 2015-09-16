@@ -33,14 +33,22 @@ def _get_paramset_by_subtype(model, schema_subtype):
     return None
 
 
-def _format_bootstrap_table_json(dataset_id, fastqc_summary):
+def _get_param_value(model, param_name, schema_subtype):
+    param_set = _get_paramset_by_subtype(model, schema_subtype)
+    if param_set:
+        return param_set.get_param(param_name)
+    else:
+        return None
+
+
+def _format_bootstrap_table_json(fastqc_summary, fastqc_dataset_id):
     """
     Unpack the datastructure representing a summary of
     FastQC results for all samples in the project and repackage it
     as JSON suitable for presentation by bootstrap-table, including a
     separate list used for table column headers.
 
-    :type dataset_id: int
+    :type fastqc_dataset_id: int
     :type fastqc_summary: dict
     :rtype: str, list
     """
@@ -60,7 +68,9 @@ def _format_bootstrap_table_json(dataset_id, fastqc_summary):
             _alnk = '<a target="_blank" ' \
                 'href="/apps/sequencing-facility/report/%s/%s' \
                 '?ignore_verification_status=1">%s</a>'
-            sample_link = _alnk % (dataset_id, fastqc_filename, sample_id_text)
+            sample_link = _alnk % (fastqc_dataset_id,
+                                   fastqc_filename,
+                                   sample_id_text)
         else:
             sample_link = '<a href="#">%s</a>' % sample_name
         results_for_sample = {'sample_name': sample_link}
@@ -75,8 +85,10 @@ def _format_bootstrap_table_json(dataset_id, fastqc_summary):
                 _alnk = '<a target="_blank" ' \
                         'href="/apps/sequencing-facility/report/%s/%s' \
                         '?ignore_verification_status=1#M%i">%s</a>'
-                result_link = _alnk % (dataset_id, fastqc_filename,
-                                       qc_anchor_index, result)
+                result_link = _alnk % (fastqc_dataset_id,
+                                       fastqc_filename,
+                                       qc_anchor_index,
+                                       result)
             else:
                 result_link = '<a href="#">%s</a>' % result
             results_for_sample[qc_field_name] = result_link
@@ -199,23 +211,9 @@ def _format_read_number_summary(fastqc_summary):
 
 
 @authz.dataset_access_required
-def view_fastqc_report(request, dataset_id, filename):
+def view_fastqc_report(request, fastqc_dataset_id, filename):
 
-    dataset = Dataset.objects.get(id=dataset_id)
-    fastqc_dataset_id = dataset_id
-
-    # If we are handed a dataset_id for a FASTQ project (which contains a
-    # ParameterSet of subtype 'nucleotide-raw-reads-dataset') rather than
-    # a FastQC dataset, we resolve the linked FastQC dataset
-    fq_dataset_subtype = 'nucleotide-raw-reads-dataset'
-    param_set = _get_paramset_by_subtype(dataset, fq_dataset_subtype)
-    if param_set:
-        fastqc_link = param_set.get_param('fastqc_dataset')
-        if fastqc_link.link_id:
-            fastqc_dataset_id = fastqc_link.link_id
-        else:
-            fastqc_dataset_id = fastqc_link.link_url.split('/')[2]
-
+    dataset = Dataset.objects.get(id=fastqc_dataset_id)
     datafile = DataFile.objects.filter(filename__exact=filename,
                                        dataset__id=fastqc_dataset_id).get()
 
@@ -224,19 +222,115 @@ def view_fastqc_report(request, dataset_id, filename):
 
 
 @authz.dataset_access_required
-def view_project_dataset(request, dataset_id):
+def view_fastq_dataset(request, dataset_id):
     """
-    Displays a Project Dataset and associated information.
 
-    Shows a dataset its metadata and a list of associated files with
-    the option to show metadata of each file and ways to download those files.
-    With write permission this page also allows uploading and metadata
-    editing.
-    Optionally, if set up in settings.py, datasets of a certain type can
-    override the default view.
-    Settings example:
-    DATASET_VIEWS = [("http://dataset.example/schema",
-                      "tardis.apps.custom_views_app.views.my_view_dataset"),]
+    This view should be used for Datasets using the FASTQ raw reads schema, by
+    defining a mapping in settings.DATASET_VIEWS.
+
+    :param request: The Django HTTP request object
+    :type request: HTTPRequest
+    :param dataset_id: The ID of the Dataset to be viewed (primary key)
+    :type dataset_id: int
+    :return: The Django HTTP response object
+    :rtype: HttpResponse
+    """
+    c, dataset = prepare_project_dataset_view(request, dataset_id)
+
+    # inspect parameters to retrieve the associated fastqc_dataset id,
+    # if present
+    fastqc_dataset_id = None
+    fq_dataset_subtype = 'nucleotide-raw-reads-dataset'
+    param_set = _get_paramset_by_subtype(dataset, fq_dataset_subtype)
+    if param_set:
+        fastqc_link = param_set.get_param('fastqc_dataset')
+        if fastqc_link.link_id:
+            fastqc_dataset_id = fastqc_link.link_id
+        else:
+            # this is a fallback, just in case link_id isn't set
+            # but string_value is ...
+            from urlparse import urlparse
+            fastqc_dataset_id = urlparse(fastqc_link.link_url).path[1]
+
+    # TODO: rather than use the fastqc_summary JSON blob associated with the
+    #       FASTQ dataset, always use the one associated with a FastQC dataset,
+    #       if one exists (then we can make the ingestor only add that
+    #       ParameterSet set to the FastQC dataset, not the FASTQ one,
+    #       to reduce duplication)
+    #       Then we remove can also fastqc_summary and fastqc_version from
+    #       prepare_project_dataset_view
+    fastqc_summary = c.get('fastqc_summary', None)
+    if fastqc_summary and fastqc_dataset_id:
+        fastqc_table_json, fastqc_table_headers = \
+            _format_bootstrap_table_json(fastqc_summary, fastqc_dataset_id)
+        c['fastqc_table_json'] = fastqc_table_json
+        c['fastqc_table_headers'] = fastqc_table_headers
+
+    overall_stats = None
+    if fastqc_summary:
+        overall_stats = _get_project_stats_from_fastqc(fastqc_summary)
+    else:
+        overall_stats = _get_project_stats_from_datafiles(dataset)
+
+    sample_stats_table = _format_read_number_summary(fastqc_summary)
+
+    c['overall_stats'] = overall_stats
+    c['sample_stats_table'] = sample_stats_table
+
+    return HttpResponse(render_response_index(
+        request,
+        'view_project_dataset.html',
+        c)
+    )
+
+
+@authz.dataset_access_required
+def view_fastqc_reports_dataset(request, dataset_id):
+    """
+
+    This view should be used for Datasets using the FastQC reports schema, by
+    defining a mapping in settings.DATASET_VIEWS.
+
+    :param request: The Django HTTP request object
+    :type request: HTTPRequest
+    :param dataset_id: The ID of the Dataset to be viewed (primary key)
+    :type dataset_id: int
+    :return: The Django HTTP response object
+    :rtype: HttpResponse
+    """
+    c, dataset = prepare_project_dataset_view(request, dataset_id)
+
+    fastqc_summary = c.get('fastqc_summary', None)
+    if fastqc_summary:
+        fastqc_table_json, fastqc_table_headers = \
+            _format_bootstrap_table_json(fastqc_summary, dataset_id)
+        c['fastqc_table_json'] = fastqc_table_json
+        c['fastqc_table_headers'] = fastqc_table_headers
+
+    return HttpResponse(render_response_index(
+        request,
+        'view_project_dataset.html',
+        c)
+    )
+
+
+def prepare_project_dataset_view(request, dataset_id):
+    """
+    Prepares the basic dictionary template for a 'Project' Dataset
+    and associated information, and the Dataset instance.
+    Caller of this method will typically add or override various
+    values before returning their own HttpResponse (and template).
+
+    Views using this method show the dataset, its metadata and a list of
+    associated files with the option to show metadata of each file and ways
+    to download those files.
+
+    :param request: The Django HTTP request object
+    :type request: HTTPRequest
+    :param dataset_id: The ID of the Dataset to be viewed (primary key)
+    :type dataset_id: int
+    :return: The template dictionary and Dataset model instance
+    :rtype: (dict, tardis.tardis_portal.Dataset)
     """
     dataset = Dataset.objects.get(id=dataset_id)
 
@@ -261,17 +355,10 @@ def view_project_dataset(request, dataset_id):
     upload_method = getattr(settings, "UPLOAD_METHOD", False)
 
     fastqc_summary = _get_fastqc_json_parameter(dataset)
+
     fastqc_version = ''
-    if fastqc_summary and len(fastqc_summary.get('samples', [])) > 0:
-        overall_stats = _get_project_stats_from_fastqc(fastqc_summary)
+    if fastqc_summary:
         fastqc_version = fastqc_summary.get('fastqc_version', '')
-    else:
-        overall_stats = _get_project_stats_from_datafiles(dataset)
-
-    fastqc_table_json, fastqc_table_headers = \
-        _format_bootstrap_table_json(dataset_id, fastqc_summary)
-
-    sample_stats_table = _format_read_number_summary(fastqc_summary)
 
     c = {
         'dataset': dataset,
@@ -288,15 +375,8 @@ def view_project_dataset(request, dataset_id):
         authz.get_accessible_experiments_for_dataset(request, dataset_id),
         'upload_method': upload_method,
         'fastqc_version': fastqc_version,
-        'fastqc_table_json': fastqc_table_json,
-        'fastqc_table_headers': fastqc_table_headers,
-        'sample_stats_table': sample_stats_table,
-        'overall_stats': overall_stats,
+        'fastqc_summary': fastqc_summary,
     }
     _add_protocols_and_organizations(request, dataset, c)
-    return HttpResponse(
-        render_response_index(
-            request,
-            'view_project_dataset.html',
-            c)
-    )
+
+    return c, dataset

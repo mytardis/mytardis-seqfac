@@ -454,8 +454,8 @@ $('#modal-metadata .submit-button').live('click', function() {
         <br/><br/>
         {% endif %}
 
-        <h3>Raw Read Statistics</h3>
         {% if sample_stats_table %}
+        <h3>Raw Read Statistics</h3>
         <div class="panel panel-default">
             <div class="well"
                  id="raw-read-summary-table-heading">
@@ -478,13 +478,11 @@ $('#modal-metadata .submit-button').live('click', function() {
             </div>
             </div>
         </div>
-        {% else %}
-            <div class="alert">No data available</div>
         {%  endif %}
 
     <br/>
-        <h3>FastQC Summary</h3>
         {% if fastqc_table_json %}
+        <h3>FastQC Summary</h3>
         <div class="panel panel-default">
             <div class="well"
                  id="fastqc-summary-table-heading">
@@ -515,8 +513,6 @@ $('#modal-metadata .submit-button').live('click', function() {
                 </div>
             </div>
         </div>
-        {% else %}
-            <div class="alert">No FastQC data available</div>
         {% endif %}
     </div>
     {% endblock dataset_content_preview %}
