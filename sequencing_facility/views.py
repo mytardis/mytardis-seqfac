@@ -211,11 +211,14 @@ def _format_read_number_summary(fastqc_summary):
 
 
 @authz.dataset_access_required
-def view_fastqc_report(request, fastqc_dataset_id, filename):
+def view_fastqc_report(request, dataset_id=None, filename=None):
+    # NOTE: the argument dataset_id must be called dataset_id
+    # for the authz decorator to work (since it's treated as a
+    # named keyword arg)
 
-    dataset = Dataset.objects.get(id=fastqc_dataset_id)
+    # dataset = Dataset.objects.get(id=fastqc_dataset_id)
     datafile = DataFile.objects.filter(filename__exact=filename,
-                                       dataset__id=fastqc_dataset_id).get()
+                                       dataset__id=dataset_id).get()
 
     from tardis.tardis_portal.download import view_datafile
     return view_datafile(request, datafile.id)
