@@ -1,11 +1,17 @@
 {% load humanize %}
-<table class="parameter_table table table-striped table-bordered"
-       {# Override style so columns are not fixed width #}
-       style="width: auto;">
+<table data-toggle="table"
+       class="sample_stats_table table table-condensed table-striped"
+       data-language="en-US"
+       width="90%"
+       data-search="true"
+       data-show-toggle="true"
+{#       data-show-columns="true"#}
+       data-buttons-align="left"
+       data-search-align="left">
     <thead>
     <tr>
         {% for thead in sample_stats_table.thead %}
-            <th>{{ thead }}</th>
+            <th class="col-xs-1">{{ thead }}</th>
         {% endfor %}
     </tr>
     </thead>
@@ -13,8 +19,10 @@
     {% for trow in sample_stats_table.tbody %}
         <tr>
             {% for cell in trow %}
-                <td>
+                <td class="col-xs-1">
+                {% autoescape off %}
                     {{ cell|intcomma }}
+                {%  endautoescape %}
                 </td>
             {% endfor %}
         </tr>

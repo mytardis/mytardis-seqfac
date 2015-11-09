@@ -60,7 +60,7 @@ def _format_bootstrap_table_json(fastqc_summary, fastqc_dataset_id):
     qc_fields = []
     fastqc_data = []
     for sample in fastqc_summary['samples']:
-        sample_name = sample['sample_name']
+        sample_name = _format_sample_name(sample['sample_name'])
         sample_id_text = sample_name + " (R%s)" % (sample['read'])
         qc_checks = sample['qc_checks']
         fastqc_filename = sample.get('fastqc_report_filename', None)
@@ -184,6 +184,25 @@ def _get_project_stats_from_datafiles(dataset):
             'read_length_stddev': read_length_stddev}
 
 
+def _format_sample_name(sample_name, break_entity=u'<wbr>'):
+    """
+    Inserts an HTML entity after every underscore in a string, to allow
+    the browser to wrap long names with linebreaks at underscores in addition
+    to the default breaks at spaces and dashes.
+
+    Default entity is <wbr> (word break). Other alternatives are &#8203;
+    (a zero width space) and &shy;
+
+    :param sample_name: A sample name, potentially containing underscores.
+    :type sample_name: basestring
+    :param after_underscore: The HTML entity to insert after underscores.
+    :type after_underscore: basestring
+    :return: The modified sample name.
+    :rtype: basestring
+    """
+    return sample_name.replace('_', '_%s' % break_entity)
+
+
 def _format_read_number_summary(fastqc_summary):
 
     if not fastqc_summary or ('samples' not in fastqc_summary):
@@ -191,7 +210,7 @@ def _format_read_number_summary(fastqc_summary):
 
     sample_stats_table = {'thead': [], 'tbody': []}
     for sample in fastqc_summary['samples']:
-        # sample_name = sample['sample_name']
+        sample_name_html = _format_sample_name(sample['sample_name'])
 
         basic_stats = sample['basic_stats']
         sample_stats_table['thead'] = sorted(basic_stats.keys())
@@ -199,6 +218,10 @@ def _format_read_number_summary(fastqc_summary):
         for k in extra_fields:
             basic_stats[k] = sample[k]
         sample_stats_table['thead'] = extra_fields + sample_stats_table['thead']
+
+        # modify the sample name for prettier HTML output (eg wrapping)
+        basic_stats['sample_name'] = sample_name_html
+
         row = []
         for col in sample_stats_table['thead']:
             row.append(basic_stats[col])
