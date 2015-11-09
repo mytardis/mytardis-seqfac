@@ -26,7 +26,7 @@
   {
     "fields": {
       "status": "online",
-      "description": "Vault Storage (tape with disk cache)",
+      "description": "SONAS Vault Storage (tape with disk cache)",
       "django_storage_class": "tardis.tardis_portal.storage.MyTardisLocalFileSystemStorage",
       "max_size": 703138037760,
       "master_box": null,
@@ -38,11 +38,11 @@
   {
     "fields": {
       "status": "online",
-      "description": "Test data",
+      "description": "SONAS Market storage (disk)",
       "django_storage_class": "tardis.tardis_portal.storage.MyTardisLocalFileSystemStorage",
       "max_size": 1548053708,
       "master_box": null,
-      "name": "test"
+      "name": "market"
     },
     "model": "tardis_portal.storagebox",
     "pk": 5
@@ -64,7 +64,7 @@
 
   {
     "fields": {
-      "value": "/srv/sonas/mhtp/market/",
+      "value": "/data/illumina/",
       "key": "location",
       "storage_box": 1
     },
@@ -91,7 +91,7 @@
   },
   {
     "fields": {
-      "value": "/data/illumina/",
+      "value": "/srv/sonas/mhtp/market/",
       "key": "location",
       "storage_box": 5
     },
