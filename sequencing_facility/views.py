@@ -192,11 +192,8 @@ def _format_read_number_summary(fastqc_summary):
     sample_stats_table = {'thead': [], 'tbody': []}
     for sample in fastqc_summary['samples']:
         # sample_name = sample['sample_name']
-        sample_name = sample['sample_name']
 
         basic_stats = sample['basic_stats']
-        # TODO: use fcs-table format for this ?
-        #       or also a bootstrap-table JSON blob ?
         sample_stats_table['thead'] = sorted(basic_stats.keys())
         extra_fields = ['sample_name', 'index', 'lane', 'read']
         for k in extra_fields:
@@ -205,6 +202,11 @@ def _format_read_number_summary(fastqc_summary):
         row = []
         for col in sample_stats_table['thead']:
             row.append(basic_stats[col])
+
+        # modify the thead keys to be prettier titles for the table
+        sample_stats_table['thead'] = [thead.replace('_', ' ').capitalize()
+                                       for thead in sample_stats_table['thead']]
+
         sample_stats_table['tbody'].append(row)
 
     return sample_stats_table
