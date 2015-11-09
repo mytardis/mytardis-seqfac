@@ -252,13 +252,18 @@ def view_fastq_dataset(request, dataset_id):
         else:
             # this is a fallback, just in case link_id isn't set
             # but string_value is ...
-            from urlparse import urlparse
+
             # TODO: We would prefer to use link_url rather than string_value
             #       but need to wait for appropriate patches in mytardis
             #       develop branch that return string_value as a fallback
             #       rather than NotImplementedError
-            # fastqc_dataset_id = urlparse(fastqc_link.link_url).path[1]
-            fastqc_dataset_id = urlparse(fastqc_link.string_value).path[1]
+            fastqc_link_url = fastqc_link.string_value
+
+            import re
+            dataset_view_regex = r'/dataset/(?P<dataset_id>\d+)$'
+            match = re.match(dataset_view_regex, fastqc_link_url)
+            fastqc_dataset_id = match.group('dataset_id')
+
 
     # TODO: rather than use the fastqc_summary JSON blob associated with the
     #       FASTQ dataset, always use the one associated with a FastQC dataset,
