@@ -323,8 +323,6 @@
 <link rel="stylesheet"
       href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.8.1/bootstrap-table.min.css">
 <style>
-    /* table { table-layout: auto; } */
-    /* table { table-layout: fixed; } */
     /* table th, table td { overflow: hidden; } */
     table th { font-size: smaller; }
 
@@ -334,14 +332,14 @@
     .fixed-table-toolbar btn-group {
         width: 500px;
     }
-    #fasta_summary_table table {
-        table-layout: auto;
+    #fasta_summary_table.table {
+        table-layout: fixed;
         min-width: 100px !important;
         max-width: 100px;
         word-break: break-all;
     }
 
-    #sample_stats_table table {
+    #sample_stats_table.table {
         table-layout: auto;
         min-width: 100px !important;
         max-width: 100px;
