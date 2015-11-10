@@ -332,19 +332,11 @@
     .fixed-table-toolbar btn-group {
         width: 500px;
     }
-    #fasta_summary_table.table {
-        table-layout: fixed;
-        min-width: 100px !important;
-        max-width: 100px;
-        word-break: break-all;
-    }
 
-    #sample_stats_table.table {
-        table-layout: auto;
-        min-width: 100px !important;
-        max-width: 100px;
-        word-break: break-all;
-    }
+    #fastqc_summary_table { table-layout: fixed; }
+    #fastqc_summary_table td { word-break: break-all; }
+    #sample_stats_table { table-layout: auto; }
+    #sample_stats_table td { word-break: break-all; }
 
 </style>
 
