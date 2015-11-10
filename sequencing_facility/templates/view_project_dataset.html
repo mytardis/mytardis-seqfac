@@ -185,9 +185,21 @@
         loadModalRemoteBody(this, '#modal-metadata');
     });
 
-
-    $('.show-hide-toggle-button').live('click', function() {
-        $(this).find('.button-label-text').text($(this).hasClass("active") ? "Hide": "Show");
+    $('#request-fast-access').live('click', function(evt){
+        evt.preventDefault();
+        var modal = '#modal-retrieve-files';
+        $(modal).find('.modal-footer').hide();
+        // Fill with "loading" placeholder content
+        $(modal).find('.modal-jobid').html(
+                $(modal).find('.loading-placeholder').html()
+        );
+        $(modal).modal('show');
+        $.ajax({
+            url: $(this).attr('href'),
+            success: function (data, textStatus, jqXHR) {
+                $(modal).find('.modal-jobid').html(data["result"]);
+            }
+        });
     });
 
     $('.pagelink').live('click', function( event ){
@@ -311,7 +323,8 @@
 <link rel="stylesheet"
       href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.8.1/bootstrap-table.min.css">
 <style>
-    table { table-layout: fixed; }
+    /* table { table-layout: auto; } */
+    /* table { table-layout: fixed; } */
     /* table th, table td { overflow: hidden; } */
     table th { font-size: smaller; }
 
@@ -325,12 +338,14 @@
         table-layout: auto;
         min-width: 100px !important;
         max-width: 100px;
+        word-break: break-all;
     }
 
     #sample_stats_table table {
         table-layout: auto;
         min-width: 100px !important;
         max-width: 100px;
+        word-break: break-all;
     }
 
 </style>
@@ -369,6 +384,28 @@ $('#modal-metadata .submit-button').live('click', function() {
   </div>
 </div>
 
+<div class="modal hide fade" id="modal-retrieve-files">
+  <div class="modal-header">
+    <a class="close" data-dismiss="modal">&times;</a>
+    <h1 class="title">Request sent</h1>
+  </div>
+
+  <div class="loading-placeholder" style="display: none">
+    <p>Please wait... <img src="{% static 'images/ajax-loader.gif'%}" alt="loading" /></p>
+  </div>
+
+  <div class="modal-body">
+      <p>You will receive an email when all
+      files are available
+      </p>
+    <div>Job ID
+        <span class="modal-jobid"></span>
+    </div>
+  </div>
+
+</div>
+
+
 <div class="modal hide fade" id="modal-upload-files">
   <div class="modal-header">
     <a class="close" data-dismiss="modal">&times;</a>
@@ -384,16 +421,24 @@ $('#modal-metadata .submit-button').live('click', function() {
 </div>
 
 <div class="page-header">
-  <h4>Raw reads (FASTQ)</h4>
-  {% if has_write_permissions %}
-  <div class="pull-right">
+  <h4>Dataset</h4>
+    <div class="pull-right">
+  {% if push_to_enabled and is_authenticated %}
+    <a class="btn btn-mini btn-danger" title="Push to..."
+       onclick="window.open('{{ push_to_url }}', 'push-to', 'width=800, height=600'); return false;"
+       href="{{ push_to_url }}" target="_blank">
+      <i class="icon-upload"></i>
+      Push to...
+    </a>
+  {% endif %}
+  {% if has_write_permissions and is_authenticated %}
     <a class="btn btn-warning btn-mini" title="Edit Dataset"
        href="{{ dataset.get_edit_url }}">
       <i class="icon-pencil"></i>
       Edit Dataset Description
     </a>
-  </div>
   {% endif %}
+    </div>
   <h1>
     {% if dataset.description %}
       <span property="dc:title">{{ dataset.description }}</span>
@@ -446,7 +491,7 @@ $('#modal-metadata .submit-button').live('click', function() {
   </p>
 </div>
 
-<div class="row-fluid" >
+<div class="row-fluid">
   <div class="span8">
     {% block dataset_content_preview %}
     <div class="row-fluid" style="margin-bottom: 20px">
@@ -576,7 +621,7 @@ $('#modal-metadata .submit-button').live('click', function() {
     <div class="span4">
 {% if has_write_permissions and not experiment.public and not immutable %}
     <span class="btn btn-success fileinput-button pull-right">
-        <i class="icon icon-plus"></i>
+        <i class="glyphicon glyphicon-plus"></i>
         <span>Add files...</span>
         <input id="fileupload" type="file" name="attached_file"
                data-url="/api/v1/dataset_file/" multiple>
@@ -585,53 +630,60 @@ $('#modal-metadata .submit-button').live('click', function() {
   </div>
 </div>
 <div class="row-fluid">
-  <div class="span8">
-  {% block downloads %}
-  {% if has_download_permissions %}
-  <p><b>Download Dataset:</b>
-    {% if organization|length > 1 %}
-      {% for p in protocol %}
-        {% for o in organization %}
-          <a class="btn btn-primary btn-mini" href="{{p.1}}{{o}}"
-             title="Download Entire Experiment as {{p.0|upper}} with {{o}} organization">
-            <i class="icon-download-alt"></i>
-            {% if o == default_organization %}
-            {{p.0|upper}}
-            {% else %}
-            {{p.0|upper}} - {{o}}
-	    {% endif %}
-          </a>
-        {% endfor %}
-      {% endfor %}
-    {% else %}
-      {% for p in protocol %}
-        <a class="btn btn-primary btn-mini" href="{{p.1}}"
-           title="Download Entire Dataset as {{p.0|upper}}">
-          <i class="icon-download-alt"></i>
-          {{p.0|upper}}
-        </a>
-      {% endfor %}
-      {% endif %}
-  </p>
-  {% endif %}
-  {% endblock downloads %}
-  </div>
-  <div class="span4">
-  {% if has_write_permissions and not experiment.public and not immutable and has_staging_access %}
-    <div class="pull-right" style="margin-top:3px;">
-      <a data-dataset_id="{{dataset.id}}" class="import_staging_files_link btn btn-mini" title="Import Staging Files">
-          <i class="icon-arrow-right"></i>
-          Import Staging Files
-      </a>
+    <div class="span8">
+        {% block downloads %}
+            {% if has_download_permissions and dataset.is_online %}
+                <p><b>Download Dataset:</b>
+                    {% if organization|length > 1 %}
+                        {% for p in protocol %}
+                            {% for o in organization %}
+                                <a class="btn btn-primary btn-mini" href="{{p.1}}{{o}}"
+                                   title="Download Entire Experiment as {{p.0|upper}} with {{o}} organization">
+                                    <i class="icon-download-alt"></i>
+                                    {% if o == default_organization %}
+                                        {{p.0|upper}}
+                                    {% else %}
+                                        {{p.0|upper}} - {{o}}
+                                    {% endif %}
+                                </a>
+                            {% endfor %}
+                        {% endfor %}
+                    {% else %}
+                        {% for p in protocol %}
+                            <a class="btn btn-primary btn-mini" href="{{p.1}}"
+                               title="Download Entire Dataset as {{p.0|upper}}">
+                                <i class="icon-download-alt"></i>
+                                {{p.0|upper}}
+                            </a>
+                        {% endfor %}
+                    {% endif %}
+                </p>
+            {%  elif has_download_permissions and not dataset.is_online %}
+                <p>Some or all files in this dataset are archived.
+                <a href="{% url "cache_dataset" dataset.id %}"
+                   id="request-fast-access"
+                   class="btn btn-success btn-mini">Retrieve All
+                    Files</a>
+                </p>
+            {% endif %}
+        {% endblock downloads %}
     </div>
-    {% endif %}
+    <div span="4">
+        {% if has_write_permissions and not experiment.public and not immutable and has_staging_access %}
+            <div class="pull-right" style="margin-top:3px;">
+                <a data-dataset_id="{{dataset.id}}" class="import_staging_files_link btn btn-mini" title="Import Staging Files">
+                    <i class="icon-arrow-right"></i>
+                    Import Staging Files
+                </a>
+            </div>
+        {% endif %}
     </div>
-  </div>
-  <div class="row-fluid">
-    <div id="progress" class="progress span12" style="height:4px;min-height:4px;margin-bottom:8px;">
-        <div class="progress-bar progress-bar-success" style="background-color:blue;height:4px;width:0%;"></div>
-    </div>
-  </div>
+</div>
+      <div class="row-fluid">
+          <div id="progress" class="progress span12" style="height:4px;min-height:4px;margin-bottom:8px;">
+              <div class="progress-bar progress-bar-success" style="background-color:blue;height:4px;width:0%;"></div>
+          </div>
+      </div>
       <div id="datafiles-pane" class="dropzone"></div>
       <div id="dropzone" class="dropzone" style="
 border: 6px dashed lightgrey;
