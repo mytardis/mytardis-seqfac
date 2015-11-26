@@ -20,7 +20,7 @@ from tardis.tardis_portal.shortcuts import render_response_index, \
     return_response_error, return_response_not_found, \
     render_response_search, get_experiment_referer
 
-from tardis.tardis_portal.views import _add_protocols_and_organizations
+from tardis.tardis_portal.views.utils import _add_protocols_and_organizations
 
 logger = logging.getLogger(__name__)
 
