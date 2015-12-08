@@ -1,16 +1,57 @@
-from tardis.tardis_portal.api import ExperimentResource
+from tastypie.contrib.contenttypes.fields import GenericForeignKeyField
+from tastypie.exceptions import Unauthorized
+
+from tardis.tardis_portal import api as tardis_api
+
 from tardis.tardis_portal.models.experiment import Experiment
 from tardis.tardis_portal.models.parameters import ParameterName
+from tardis.tardis_portal.models.access_control import ObjectACL
+from tardis.tardis_portal.auth.decorators import has_delete_permissions
+from tardis.tardis_portal.auth.decorators import has_write_permissions
+
+default_authentication = tardis_api.MyTardisAuthentication()
+
+
+class AppACLAuthorization(tardis_api.ACLAuthorization):
+    """
+    Authorisation class for Tastypie.
+    Subclasses default MyTardis API authorization to add permission for
+    additional operations (eg delete ObjectACLs)
+    """
+
+    def delete_list(self, object_list, bundle):
+        if isinstance(bundle.obj, ObjectACL):
+            # must be allowed to delete ObjectACLs and change the associated
+            # Experiment to be able to delete the ObjectACL
+            return bundle.request.user.has_perm(
+                'tardis_portal.delete_objectacl') and \
+                   has_write_permissions(bundle.request,
+                                          bundle.obj.object_id)
+
+        return super(tardis_api.ACLAuthorization,
+                     self).delete_list(object_list, bundle)
+
+    def delete_detail(self, object_list, bundle):
+        if isinstance(bundle.obj, ObjectACL):
+            # must be allowed to delete ObjectACLs and change the associated
+            # Experiment to be able to delete the ObjectACL
+            return bundle.request.user.has_perm(
+                'tardis_portal.delete_objectacl') and \
+                   has_write_permissions(bundle.request,
+                                          bundle.obj.object_id)
+
+        return super(tardis_api.ACLAuthorization,
+                     self).delete_detail(object_list, bundle)
 
 
 # this class name must end in AppResource to be detected by tardis.urls
-class ExperimentAppResource(ExperimentResource):
+class ExperimentAppResource(tardis_api.ExperimentResource):
     """
     Extends MyTardis's RESTful API for Experiments to allow queries to retrieve
     experiment records by matching parameter values.
     """
 
-    class Meta(ExperimentResource.Meta):
+    class Meta(tardis_api.ExperimentResource.Meta):
         # This will be mapped to <app_name>_experiment by MyTardis's urls.py
         # (eg /api/v1/sequencing_facility_experiment/)
         resource_name = 'experiment'
@@ -40,6 +81,7 @@ class ExperimentAppResource(ExperimentResource):
             name = bundle.request.GET['parameter_name']
             value = bundle.request.GET['parameter_value']
 
+            parameter_type = None
             if 'parameter_type' in bundle.request.GET:
                 parameter_type = bundle.request.GET['parameter_type']
             else:
@@ -57,6 +99,7 @@ class ExperimentAppResource(ExperimentResource):
                 if pname.isDateTime():
                     parameter_type = 'datetime_range'
 
+            expt = []
             filter_prefix = 'experimentparameterset__experimentparameter__'
             if parameter_type == 'string':
                 expts = Experiment.safe.all(bundle.request.user).filter(
@@ -83,4 +126,30 @@ class ExperimentAppResource(ExperimentResource):
 
             return expts
 
-        return super(ExperimentResource, self).obj_get_list(bundle, **kwargs)
+        return super(tardis_api.ExperimentResource, self).obj_get_list(bundle,
+                                                                       **kwargs)
+
+
+# TODO: This is a temporary subclass of ObjectACLResource to allow
+#       queries via object_id and content_type. Once the bug/feature is
+#       added to MyTardis develop, this class can be removed (and clients
+#       updated to use /api/v1/objectacl/ instead of
+#       /api/v1/sequencing_facility_objectacl/
+class ObjectACLAppResource(tardis_api.ObjectACLResource):
+    content_object = GenericForeignKeyField({
+        Experiment: tardis_api.ExperimentResource,
+        # ...
+    }, 'content_object')
+
+    class Meta(tardis_api.ObjectACLResource.Meta):
+        # This will be mapped to <app_name>_experiment by MyTardis's urls.py
+        # (eg /api/v1/sequencing_facility_objectacl/)
+        resource_name = 'objectacl'
+        authorization = AppACLAuthorization()
+
+        filtering = {
+            'pluginId': ('exact', ),
+            'entityId': ('exact', ),
+            'object_id': ('exact', ),
+            'content_type': ('exact', ),
+        }
