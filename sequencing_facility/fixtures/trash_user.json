@@ -1,0 +1,28 @@
+[
+  {
+    "fields": {
+      "username": "__trashman__",
+      "first_name": "",
+      "last_name": "",
+      "is_active": true,
+      "is_superuser": false,
+      "is_staff": false,
+      "last_login": "1970-01-01T00:00:00Z",
+      "groups": [ 999 ],
+      "user_permissions": [],
+      "password": "",
+      "email": "trash@example.com",
+      "date_joined": "1970-01-01T00:00:00Z"
+    },
+    "model": "auth.user",
+    "pk": null
+  },
+    {
+    "fields": {
+      "name": "__trashcan__",
+      "permissions": []
+    },
+    "model": "auth.group",
+    "pk": 999
+  }
+]
