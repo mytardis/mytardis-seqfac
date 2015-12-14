@@ -1,0 +1,18 @@
+[
+  {
+    "fields": {
+      "name": "mhtp-facility-managers",
+      "permissions": []
+    },
+    "model": "auth.group",
+    "pk": 2
+  },
+  {
+    "fields": {
+      "manager_group": 2,
+      "name": "MHTP Genomics"
+    },
+    "model": "tardis_portal.facility",
+    "pk": 1
+  }
+]

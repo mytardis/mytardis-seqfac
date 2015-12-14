@@ -1,0 +1,10 @@
+[
+  {
+    "fields": {
+      "name": "HiSeq1500 SNL177",
+      "facility": 1
+    },
+    "model": "tardis_portal.instrument",
+    "pk": null
+  }
+]
