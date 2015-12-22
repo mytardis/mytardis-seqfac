@@ -1,0 +1,219 @@
+{% extends "tardis_portal/portal_template.html" %}
+{% load static from staticfiles %}
+{% load experiment_tags %}
+{% load experimentstats %}
+{% load bleach_tag %}
+
+{% block script %}
+{% endblock script %}
+
+{% block content %}
+<div id="content">
+  <div class="page-header">
+    <h1>{{site_title|default:'MyTardis'}} Data Store</h1>
+  </div>
+    {% if not is_authenticated %}
+    <p>
+        {% if RAPID_CONNECT_ENABLED %}
+            Please <a href={{ RAPID_CONNECT_LOGIN_URL }}>login</a>
+            to see your experiment data.
+        {% else %}
+            Please
+            <a href="{% url 'tardis.tardis_portal.views.login' %}">login</a>
+            to see your experiment data.
+        {% endif %}
+    </p>
+    {% endif %}
+  <div class="row-fluid">
+    <div class="span9">
+      {% if is_authenticated %}
+	<h3>Recent runs <small><strong>(<a href="{% url 'tardis.tardis_portal.views.my_data' %}">view all</a>)</strong></small></h3>
+	<div id="experiments" class="accordion">
+	  {% for exp in private_experiments %}
+	    <div class="accordion-group">
+	      <div class="accordion-heading" data-parent="#experiments">
+		  <div class="accordion-toggle" data-toggle="collapse"  data-parent="#experiments"
+		       onclick="$('#collapse{{exp.id}}').collapse('toggle');" >
+		    <strong><a class="pull-left explink"
+			       href="{% url 'tardis.tardis_portal.views.view_experiment' exp.id %}">{{ exp.title }}</a></strong>
+		    <ul class="nav nav-pills badgelist">
+		      <li class="pull-right">
+			{{ exp|experiment_public_access_badge }}
+		      </li>
+		      <li class="pull-right">
+			{{ exp|experiment_datafiles_badge }}
+		      </li>
+		      <li class="pull-right">
+			{{ exp|experiment_datasets_badge }}
+		      </li>
+		      <li class="pull-right">
+			{{ exp|experiment_last_updated_badge }}
+		      </li>
+		    </ul>
+		    <small>
+		      {% for author in exp.experimentauthor_set.all %}{% if not forloop.first %}, {% endif %}
+		      <span property="dc:author">{{ author.author }}</span>{% empty %}&nbsp;{% endfor %}
+		    </small>
+{% comment %}
+		    <span class="pull-right">
+		      {% for dltype, dlurl in exp.get_download_urls.items %}
+			{% if forloop.first %}
+			  <a class="dllink" href="{{dlurl}}"
+			     title="Download Entire Experiment as {{dltype}}">
+			    <i class="icon-download-alt"></i>
+			    <em>Download data as .{{dltype}}</em>
+			  </a>
+			{% endif %}
+		      {% endfor %}
+		    </span>
+{% endcomment %}
+          </div>
+	      </div>
+	      <div id="collapse{{exp.id}}"
+		   class="accordion-body collapse{% if forloop.first %} in{% endif %}">
+		<div class="accordion-inner">
+		  <p>{{exp.description|default:"<em>No description</em>"|bleach}}</p>
+		  {% for proj_expt in exp.projects.all %}
+		    {% if forloop.first %}
+		      <ul class="nav nav-list">
+			{% with total=exp.projects.all|length %}
+			  <li class="nav-header dataset-list-header">The most recent project{{total|pluralize}} in this run</li>
+			{% endwith %}
+		      {% endif %}
+		      <li>
+			<a href="{% url 'tardis.tardis_portal.views.view_experiment' proj_expt.id %}"><strong>{{ proj_expt.title }}</strong></a>
+{% comment %}
+			{% for datafile in proj_expt.get_images|slice:":5" %}
+			  {% if forloop.first %}
+			    <ul class="thumbnails">
+			  {% endif %}
+			  <li>
+			    <a class="thumbnail" href="{% url 'tardis.tardis_portal.download.view_datafile' datafile.id %}">{% url 'tardis.tardis_portal.iiif.download_image' datafile_id=datafile.id region='full' size=',50' rotation=0 quality='native' format='jpg' as thumbnail %}
+			    <img alt="Thumbnail for Datafile #{{datafile.id}}"
+				 src="{{ thumbnail }}"
+				 onerror="$(this).hide()"/></a>
+			  </li>
+			  {% if forloop.last %}
+			    </ul>
+			  {% endif %}
+			{% endfor %}
+{% endcomment %}
+		      </li>
+		      {% if forloop.last %}
+			</ul>
+		      {% endif %}
+		    {% endfor %}
+		</div>
+	      </div>
+	    </div>
+	    {% empty %}
+	    <p>You have no data stored on this server.<br/>
+	    <a href="{% url 'tardis.tardis_portal.views.create_experiment' %}">Create
+	    a new experiment</a> and upload your data</p>
+	  {% endfor %}
+	  <br/>
+      {% endif %}
+
+      {% with total=public_experiments|length %}
+	<h3>The {{ total }} most recent public experiment{{total|pluralize}}</h3>
+      {% endwith %}
+      {% if not is_authenticated %}
+	<div id="experiments" class="accordion">
+      {% endif %}
+      {% for exp in public_experiments %}
+	<div class="accordion-group">
+	  <div class="accordion-heading" data-parent="#experiments">
+	    <div class="accordion-toggle"
+		 data-toggle="collapse"  data-parent="#experiments"
+		 onclick="$('#collapsepub{{exp.id}}').collapse('toggle');" >
+	      <strong><a class="pull-left explink"
+			 href="{% url 'tardis.tardis_portal.views.view_experiment' exp.id %}">{{ exp.title }}</a></strong>
+	      <ul class="nav nav-pills badgelist">
+		<li class="pull-right">
+		  {{ exp|experiment_datafiles_badge }}
+		</li>
+		<li class="pull-right">
+		  {{ exp|experiment_datasets_badge }}
+		</li>
+		<li class="pull-right">
+		  {{ exp|experiment_last_updated_badge }}
+		</li>
+	      </ul>
+	      <small>
+		{% for author in exp.experimentauthor_set.all %}{% if not forloop.first %},
+	      {% endif %}
+	      <span property="dc:author">{{ author.author }}</span>{% empty %}&nbsp;{% endfor %}
+	      </small>
+	      <span class="pull-right">
+		{% if exp.public_download_allowed %}
+
+		  {% for dltype, dlurl in exp.get_download_urls.items %}
+		    {% if forloop.first %}
+		      <a class="dllink" href="{{dlurl}}"
+			 title="Download Entire Experiment as {{dltype}}">
+			<i class="icon-download-alt"></i>
+			<em>Download data as .{{dltype}}</em>
+		      </a>
+		    {% endif %}
+		  {% endfor %}
+		 {% endif %}
+	      </span>
+	    </div>
+	  </div>
+	  <div id="collapsepub{{exp.id}}"
+	       class="accordion-body collapse{% if forloop.first and not is_authenticated %} in{% endif %}">
+	    <div class="accordion-inner">
+	      <p>{{exp.description|default:"<em>No description</em>"|bleach}}</p>
+	      {% for ds in exp.datasets.all|dictsortreversed:"id"|slice:":5" %}
+		{% if forloop.first %}
+		  <ul class="nav nav-list">
+		    {% with total=exp.datasets.all|length %}
+		      <li class="nav-header dataset-list-header">The most recent dataset{{total|pluralize}} in this experiment</li>
+		    {% endwith %}
+		  {% endif %}
+		  <li>
+		    <a href="{% url 'tardis.tardis_portal.views.view_dataset' ds.id %}"><strong>{{ ds.description }}</strong></a>
+		    {% if exp.public_download_allowed %}
+
+		    {% for datafile in ds.get_images|slice:":5" %}
+		      {% if forloop.first %}
+			<ul class="thumbnails">
+		      {% endif %}
+		      <li>
+			<a class="thumbnail" href="{% url 'tardis.tardis_portal.download.view_datafile' datafile.id %}">{% url 'tardis.tardis_portal.iiif.download_image' datafile_id=datafile.id region='full' size=',50' rotation=0 quality='native' format='jpg' as thumbnail %}
+			<img alt="Thumbnail for Datafile #{{datafile.id}}"
+			     src="{{ thumbnail }}"
+			     onerror="$(this).hide()"/></a>
+		      </li>
+		      {% if forloop.last %}
+			</ul>
+		      {% endif %}
+		    {% endfor %}
+		    {% endif %}
+		  </li>
+		  {% if forloop.last %}
+		    </ul>
+		  {% endif %}
+		{% endfor %}
+	    </div>
+	  </div>
+	</div>
+	{% empty %}
+	<p>There is no public data available on this server.</p>
+      {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+$(function(){
+    $("#experiments .accordion-body").collapse({parent:"#experiments", toggle: false});
+    $(".explink").click(function(e){
+	e.stopPropagation();
+    });
+    $(".dllink").click(function(e){
+	e.stopPropagation();
+    });
+});
+</script>
+{% endblock content %}

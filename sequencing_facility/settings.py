@@ -1,5 +1,7 @@
 NAME = 'Sequencing Facility'
 
+INDEX_VIEWS = {1: 'tardis.apps.sequencing_facility.views.index'}
+
 DATASET_VIEWS = [
     ('http://www.tardis.edu.au/schemas/ngs/project/raw_reads',
      'tardis.apps.sequencing_facility.views.view_fastq_dataset'),

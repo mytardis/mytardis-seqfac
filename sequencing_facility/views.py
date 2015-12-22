@@ -2,25 +2,23 @@ import logging
 import os
 import os.path as path
 import json
-
 from django.conf import settings
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
-from django.http import HttpResponseRedirect, HttpResponse,\
+from django.http import HttpResponseRedirect, HttpResponse, \
     HttpResponseForbidden, HttpResponseNotFound
 from django.utils.text import slugify
-
 from tardis.tardis_portal.auth import decorators as authz
 from tardis.tardis_portal.models import Experiment, ExperimentParameter, \
     DatafileParameter, DatasetParameter, ObjectACL, DataFile, \
     DatafileParameterSet, ParameterName, GroupAdmin, Schema, \
     Dataset, ExperimentParameterSet, DatasetParameterSet, \
     License, UserProfile, UserAuthentication, Token
-
 from tardis.tardis_portal.shortcuts import render_response_index, \
     return_response_error, return_response_not_found, \
     render_response_search, get_experiment_referer
-
 from tardis.tardis_portal.views.utils import _add_protocols_and_organizations
+from tardis.tardis_portal.views.pages import index_context
+from tardis.tardis_portal.download import view_datafile
 
 logger = logging.getLogger(__name__)
 
@@ -66,8 +64,8 @@ def _format_bootstrap_table_json(fastqc_summary, fastqc_dataset_id):
         fastqc_filename = sample.get('fastqc_report_filename', None)
         if fastqc_filename:
             _alnk = '<a target="_blank" ' \
-                'href="/apps/sequencing-facility/report/%s/%s' \
-                '?ignore_verification_status=1">%s</a>'
+                    'href="/apps/sequencing-facility/report/%s/%s' \
+                    '?ignore_verification_status=1">%s</a>'
             sample_link = _alnk % (fastqc_dataset_id,
                                    fastqc_filename,
                                    sample_id_text)
@@ -147,8 +145,8 @@ def _get_project_stats_from_fastqc(fastqc_summary):
     # if one of the values isn't set, don't return misleading
     # overall stats, just return None
     if None in read_lengths or \
-       None in read_numbers or \
-       None in gc_percents:
+                    None in read_numbers or \
+                    None in gc_percents:
         return None
 
     read_length_mean = numpy.mean(read_lengths)
@@ -185,7 +183,6 @@ def _get_project_stats_from_datafiles(dataset):
 
 
 def _format_read_number_summary(fastqc_summary):
-
     if not fastqc_summary or ('samples' not in fastqc_summary):
         return None
 
@@ -226,7 +223,6 @@ def view_fastqc_report(request, dataset_id=None, filename=None):
     datafile = DataFile.objects.filter(filename__exact=filename,
                                        dataset__id=dataset_id).get()
 
-    from tardis.tardis_portal.download import view_datafile
     return view_datafile(request, datafile.id)
 
 
@@ -269,7 +265,6 @@ def view_fastq_dataset(request, dataset_id):
             dataset_view_regex = r'/dataset/(?P<dataset_id>\d+)$'
             match = re.match(dataset_view_regex, fastqc_link_url)
             fastqc_dataset_id = match.group('dataset_id')
-
 
     # TODO: rather than use the fastqc_summary JSON blob associated with the
     #       FASTQ dataset, always use the one associated with a FastQC dataset,
@@ -383,15 +378,15 @@ def prepare_project_dataset_view(request, dataset_id):
         'dataset': dataset,
         'datafiles': get_datafiles_page(),
         'parametersets': dataset.getParameterSets()
-                                .exclude(schema__hidden=True),
+            .exclude(schema__hidden=True),
         'has_download_permissions':
-        authz.has_dataset_download_access(request, dataset_id),
+            authz.has_dataset_download_access(request, dataset_id),
         'has_write_permissions':
-        authz.has_dataset_write(request, dataset_id),
+            authz.has_dataset_write(request, dataset_id),
         'from_experiment':
-        get_experiment_referer(request, dataset_id),
+            get_experiment_referer(request, dataset_id),
         'other_experiments':
-        authz.get_accessible_experiments_for_dataset(request, dataset_id),
+            authz.get_accessible_experiments_for_dataset(request, dataset_id),
         'upload_method': upload_method,
         'fastqc_version': fastqc_version,
         'fastqc_summary': fastqc_summary,
@@ -399,3 +394,60 @@ def prepare_project_dataset_view(request, dataset_id):
     _add_protocols_and_organizations(request, dataset, c)
 
     return c, dataset
+
+
+def index(request):
+    limit = 8
+
+    c = {}
+    c['private_experiments'] = None
+
+    if request.user.is_authenticated():
+        private_experiments = Experiment.safe.owned_and_shared(
+            request.user).order_by('-update_time')
+        runs = private_experiments.filter(
+            experimentparameterset__schema__subtype='illumina-sequencing-run',
+            experimentparameterset__schema__type=Schema.EXPERIMENT,
+        )
+
+        # c = index_context(request)
+        # private_experiments = c.get('private_experiments', [])
+        run_expts = []
+        for run in runs[:limit]:
+            if run:
+                paramset = run.experimentparameterset_set.filter(
+                    schema__subtype='illumina-sequencing-run',
+                    schema__type=Schema.EXPERIMENT).get()
+                run_id = paramset.get_param('run_id').get()
+
+                projects_in_run = Experiment.safe.owned_and_shared(
+                    request.user).filter(
+                    experimentparameterset__schema__subtype='demultiplexed-samples',
+                    experimentparameterset__schema__type=Schema.EXPERIMENT,
+                    experimentparameterset__experimentparameter__name__name__exact='run_experiment',
+                    experimentparameterset__experimentparameter__link_id=run.id,
+
+                    # An alternative to matching based on the linked run_experiment is to
+                    # match based on run_id, but it assumes that run_id is always unique
+                    # and this isn't strictly the case for users that can see 'trashed'
+                    # experiments (eg admins)
+                    # experimentparameterset__experimentparameter__name__name__exact='run_id',
+                    # experimentparameterset__experimentparameter__string_value__exact=run_id,
+                )
+
+                run.projects = projects_in_run
+                run_expts.append(run)
+
+        c['private_experiments'] = run_expts
+
+    c['public_experiments'] = None
+    c['RAPID_CONNECT_ENABLED'] = getattr(settings,
+                                         'RAPID_CONNECT_ENABLED', False)
+    if c['RAPID_CONNECT_ENABLED']:
+        c['RAPID_CONNECT_LOGIN_URL'] = settings.getattr(
+            settings.RAPID_CONNECT_CONFIG,
+            'authnrequest_url')
+
+    return HttpResponse(render_response_index(request,
+                                              'index.html',
+                                              c))
