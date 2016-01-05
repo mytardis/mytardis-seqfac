@@ -7,6 +7,9 @@ from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.http import HttpResponseRedirect, HttpResponse, \
     HttpResponseForbidden, HttpResponseNotFound
 from django.utils.text import slugify
+
+from tardis.tardis_portal.views.pages import IndexView, use_rapid_connect, \
+    class_to_view
 from tardis.tardis_portal.auth import decorators as authz
 from tardis.tardis_portal.models import Experiment, ExperimentParameter, \
     DatafileParameter, DatasetParameter, ObjectACL, DataFile, \
@@ -17,7 +20,7 @@ from tardis.tardis_portal.shortcuts import render_response_index, \
     return_response_error, return_response_not_found, \
     render_response_search, get_experiment_referer
 from tardis.tardis_portal.views.utils import _add_protocols_and_organizations
-from tardis.tardis_portal.views.pages import index_context
+# from tardis.tardis_portal.views.pages import index_context
 from tardis.tardis_portal.download import view_datafile
 
 logger = logging.getLogger(__name__)
@@ -396,58 +399,89 @@ def prepare_project_dataset_view(request, dataset_id):
     return c, dataset
 
 
-def index(request):
-    limit = 8
+class SequencingFacilityIndexView(IndexView):
+    template_name = 'index.html'
 
-    c = {}
-    c['private_experiments'] = None
-
-    if request.user.is_authenticated():
-        private_experiments = Experiment.safe.owned_and_shared(
-            request.user).order_by('-update_time')
-        runs = private_experiments.filter(
-            experimentparameterset__schema__subtype='illumina-sequencing-run',
-            experimentparameterset__schema__type=Schema.EXPERIMENT,
+    def get_projects_for_run(self, user, run):
+        projects_in_run = Experiment.safe.owned_and_shared(user).filter(
+                experimentparameterset__schema__subtype='demultiplexed-samples',
+                experimentparameterset__schema__type=Schema.EXPERIMENT,
+                experimentparameterset__experimentparameter__name__name__exact=
+                'run_experiment',
+                experimentparameterset__experimentparameter__link_id=run.id,
         )
 
-        # c = index_context(request)
-        # private_experiments = c.get('private_experiments', [])
-        run_expts = []
-        for run in runs[:limit]:
-            if run:
-                paramset = run.experimentparameterset_set.filter(
-                    schema__subtype='illumina-sequencing-run',
-                    schema__type=Schema.EXPERIMENT).get()
-                run_id = paramset.get_param('run_id').get()
+        # An alternative to matching based on the linked
+        # run_experiment is to match based on run_id, but
+        # it assumes that run_id is always unique and this
+        # isn't strictly the case for users that can see
+        # 'trashed' experiments (eg admins)
 
-                projects_in_run = Experiment.safe.owned_and_shared(
-                    request.user).filter(
-                    experimentparameterset__schema__subtype='demultiplexed-samples',
-                    experimentparameterset__schema__type=Schema.EXPERIMENT,
-                    experimentparameterset__experimentparameter__name__name__exact='run_experiment',
-                    experimentparameterset__experimentparameter__link_id=run.id,
+        # paramset = run.experimentparameterset_set.filter(
+        #        schema__subtype='illumina-sequencing-run',
+        #        schema__type=Schema.EXPERIMENT).get()
+        # run_id = paramset.get_param('run_id').get()
 
-                    # An alternative to matching based on the linked run_experiment is to
-                    # match based on run_id, but it assumes that run_id is always unique
-                    # and this isn't strictly the case for users that can see 'trashed'
-                    # experiments (eg admins)
-                    # experimentparameterset__experimentparameter__name__name__exact='run_id',
-                    # experimentparameterset__experimentparameter__string_value__exact=run_id,
-                )
+        # projects_in_run = Experiment.safe.owned_and_shared(
+        #         request.user).filter(
+        #         experimentparameterset__schema__subtype=
+        #         'demultiplexed-samples',
+        #         experimentparameterset__schema__type=
+        #         Schema.EXPERIMENT,
+        #         experimentparameterset__experimentparameter__name__name__exact=
+        #         'run_id',
+        #         experimentparameterset__experimentparameter__string_value__exact=
+        #         run_id,
+        # )
 
-                run.projects = projects_in_run
-                run_expts.append(run)
+        return projects_in_run
 
-        c['private_experiments'] = run_expts
+    @use_rapid_connect
+    def get_context_data(self, request, **kwargs):
+        """
+        Prepares the values to be passed to the default index view - a list of
+        experiments, respecting authorization rules.
 
-    c['public_experiments'] = None
-    c['RAPID_CONNECT_ENABLED'] = getattr(settings,
-                                         'RAPID_CONNECT_ENABLED', False)
-    if c['RAPID_CONNECT_ENABLED']:
-        c['RAPID_CONNECT_LOGIN_URL'] = settings.getattr(
-            settings.RAPID_CONNECT_CONFIG,
-            'authnrequest_url')
+        :param request: a HTTP request object
+        :type request: :class:`django.http.HttpRequest`
+        :return: A dictionary of values for the view/template.
+        :rtype: dict
+        """
 
-    return HttpResponse(render_response_index(request,
-                                              'index.html',
-                                              c))
+        limit = 8
+        # c = super(IndexView, self).get_context_data(**kwargs)
+        c = {}
+        c['private_experiments'] = None
+
+        if request.user.is_authenticated():
+            private_experiments = Experiment.safe.owned_and_shared(
+                    request.user).order_by('-update_time')
+            runs = private_experiments.filter(
+                    experimentparameterset__schema__subtype=
+                    'illumina-sequencing-run',
+                    experimentparameterset__schema__type=
+                    Schema.EXPERIMENT,
+            )
+
+            # private_experiments = c.get('private_experiments', [])
+            run_expts = []
+            for run in runs[:limit]:
+                if run:
+                    run.projects = self.get_projects_for_run(request.user, run)
+                    run_expts.append(run)
+
+            c['private_experiments'] = run_expts
+
+        c['public_experiments'] = None
+
+        return c
+
+    def get(self, request, *args, **kwargs):
+        c = self.get_context_data(request, **kwargs)
+
+        return HttpResponse(render_response_index(request,
+                                                  self.template_name, c))
+
+
+def index(request, *args, **kwargs):
+    return class_to_view(SequencingFacilityIndexView, request, *args, **kwargs)
