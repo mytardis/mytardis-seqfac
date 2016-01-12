@@ -1,15 +1,15 @@
 NAME = 'Sequencing Facility'
+SITE_TITLE = 'Sequencing Facility'
 
-INDEX_VIEWS = {1: 'tardis.apps.sequencing_facility.views.index'}
+INDEX_VIEWS = {1: 'tardis.apps.sequencing_facility.views.'
+                  'SequencingFacilityIndexView'}
 
 DATASET_VIEWS = [
     ('http://www.tardis.edu.au/schemas/ngs/project/raw_reads',
-     'tardis.apps.sequencing_facility.views.view_fastq_dataset'),
+     'tardis.apps.sequencing_facility.views.FastqDatasetView'),
     ('http://www.tardis.edu.au/schemas/ngs/project/fastqc',
-     'tardis.apps.sequencing_facility.views.view_fastqc_reports_dataset')
+     'tardis.apps.sequencing_facility.views.FastqcDatasetView')
 ]
-
-SITE_TITLE = "Sequencing Facility"
 
 # footer text
 SPONSORED_TEXT = None

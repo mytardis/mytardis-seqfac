@@ -8,8 +8,8 @@ from django.http import HttpResponseRedirect, HttpResponse, \
     HttpResponseForbidden, HttpResponseNotFound
 from django.utils.text import slugify
 
-from tardis.tardis_portal.views.pages import IndexView, use_rapid_connect, \
-    class_to_view
+from tardis.tardis_portal.views.pages import IndexView, DatasetView, \
+    use_rapid_connect
 from tardis.tardis_portal.auth import decorators as authz
 from tardis.tardis_portal.models import Experiment, ExperimentParameter, \
     DatafileParameter, DatasetParameter, ObjectACL, DataFile, \
@@ -216,187 +216,133 @@ def _format_read_number_summary(fastqc_summary):
     return sample_stats_table
 
 
-@authz.dataset_access_required
-def view_fastqc_report(request, dataset_id=None, filename=None):
-    # NOTE: the argument dataset_id must be called dataset_id
-    # for the authz decorator to work (since it's treated as a
-    # named keyword arg)
+class FastqDatasetView(DatasetView):
+    template_name = 'view_project_dataset.html'
 
-    # dataset = Dataset.objects.get(id=fastqc_dataset_id)
-    datafile = DataFile.objects.filter(filename__exact=filename,
-                                       dataset__id=dataset_id).get()
+    def get_context_data(self, request, dataset, **kwargs):
+        c = super(FastqDatasetView, self).get_context_data(request,
+                                                           dataset,
+                                                           **kwargs)
 
-    return view_datafile(request, datafile.id)
+        c = self._prepare_fastq_summary_tables_context(request, c)
 
+        return c
 
-@authz.dataset_access_required
-def view_fastq_dataset(request, dataset_id):
-    """
+    def _prepare_fastq_summary_tables_context(self, request, c):
+        """
+        For FASTQ and FastQC datasets, adds the FastQC summary table,
+        sample stats table and overall stats summary to the context.
 
-    This view should be used for Datasets using the FASTQ raw reads schema, by
-    defining a mapping in settings.DATASET_VIEWS.
+        :param request: The Django HTTP request object
+        :type request: HTTPRequest
+        :param c: The context dictionary
+        :type c: dict
+        :return: The context dictionary
+        :rtype: dict
+        """
 
-    :param request: The Django HTTP request object
-    :type request: HTTPRequest
-    :param dataset_id: The ID of the Dataset to be viewed (primary key)
-    :type dataset_id: int
-    :return: The Django HTTP response object
-    :rtype: HttpResponse
-    """
-    c, dataset = prepare_project_dataset_view(request, dataset_id)
+        dataset = c.get('dataset', None)
+        if dataset is None:
+            raise AttributeError("Context must contain a 'dataset' key.")
 
-    # inspect parameters to retrieve the associated fastqc_dataset id,
-    # if present
-    fastqc_dataset_id = None
-    fq_dataset_subtype = 'nucleotide-raw-reads-dataset'
-    param_set = _get_paramset_by_subtype(dataset, fq_dataset_subtype)
-    if param_set:
-        fastqc_link = param_set.get_param('fastqc_dataset')
-        if fastqc_link.link_id:
-            fastqc_dataset_id = fastqc_link.link_id
+        fastqc_dataset_id = None
+
+        # For a FASTQ dataset, inspect parameters to retrieve the associated
+        # fastqc_dataset_id if present
+        fq_param_set = _get_paramset_by_subtype(dataset,
+                                                'nucleotide-raw-reads-dataset')
+
+        if fq_param_set:
+            fastqc_link = fq_param_set.get_param('fastqc_dataset')
+            if fastqc_link.link_id:
+                fastqc_dataset_id = fastqc_link.link_id
+            else:
+                # this is a fallback, just in case link_id isn't set
+                # but string_value is ...
+
+                # TODO: We would prefer to use link_url rather than string_value
+                #       but need to wait for appropriate patches in mytardis
+                #       develop branch that return string_value as a fallback
+                #       rather than NotImplementedError
+                fastqc_link_url = fastqc_link.string_value
+
+                import re
+                dataset_view_regex = r'/dataset/(?P<dataset_id>\d+)$'
+                match = re.match(dataset_view_regex, fastqc_link_url)
+                fastqc_dataset_id = match.group('dataset_id')
+
+        # For a FastQC reports dataset, the fastqc_dataset_id is the dataset.id
+        fqc_param_set = _get_paramset_by_subtype(dataset, 'fastqc-reports')
+        if fqc_param_set and dataset is not None:
+            fastqc_dataset_id = dataset.id
+
+        fastqc_summary = _get_fastqc_json_parameter(dataset)
+        fastqc_version = ''
+        if fastqc_summary:
+            fastqc_version = fastqc_summary.get('fastqc_version', '')
+
+        c['fastqc_version'] = fastqc_version
+        c['fastqc_summary'] = fastqc_summary
+
+        # TODO: rather than use the fastqc_summary JSON blob associated with the
+        #       FASTQ dataset, always use the one associated with a FastQC
+        #       dataset, if one exists (then we can make the ingestor only add
+        #       that ParameterSet set to the FastQC dataset, not the FASTQ one,
+        #       to reduce duplication)
+        #       Then we remove can also fastqc_summary and fastqc_version from
+        #       prepare_project_dataset_view
+        if fastqc_summary and fastqc_dataset_id:
+            fastqc_table_json, fastqc_table_headers = \
+                _format_bootstrap_table_json(fastqc_summary, fastqc_dataset_id)
+            c['fastqc_table_json'] = fastqc_table_json
+            c['fastqc_table_headers'] = fastqc_table_headers
+
+        if fastqc_summary:
+            overall_stats = _get_project_stats_from_fastqc(fastqc_summary)
         else:
-            # this is a fallback, just in case link_id isn't set
-            # but string_value is ...
+            overall_stats = _get_project_stats_from_datafiles(dataset)
 
-            # TODO: We would prefer to use link_url rather than string_value
-            #       but need to wait for appropriate patches in mytardis
-            #       develop branch that return string_value as a fallback
-            #       rather than NotImplementedError
-            fastqc_link_url = fastqc_link.string_value
+        sample_stats_table = _format_read_number_summary(fastqc_summary)
 
-            import re
-            dataset_view_regex = r'/dataset/(?P<dataset_id>\d+)$'
-            match = re.match(dataset_view_regex, fastqc_link_url)
-            fastqc_dataset_id = match.group('dataset_id')
+        c['overall_stats'] = overall_stats
+        c['sample_stats_table'] = sample_stats_table
 
-    # TODO: rather than use the fastqc_summary JSON blob associated with the
-    #       FASTQ dataset, always use the one associated with a FastQC dataset,
-    #       if one exists (then we can make the ingestor only add that
-    #       ParameterSet set to the FastQC dataset, not the FASTQ one,
-    #       to reduce duplication)
-    #       Then we remove can also fastqc_summary and fastqc_version from
-    #       prepare_project_dataset_view
-    fastqc_summary = c.get('fastqc_summary', None)
-    if fastqc_summary and fastqc_dataset_id:
-        fastqc_table_json, fastqc_table_headers = \
-            _format_bootstrap_table_json(fastqc_summary, fastqc_dataset_id)
-        c['fastqc_table_json'] = fastqc_table_json
-        c['fastqc_table_headers'] = fastqc_table_headers
+        return c
 
-    overall_stats = None
-    if fastqc_summary:
-        overall_stats = _get_project_stats_from_fastqc(fastqc_summary)
-    else:
-        overall_stats = _get_project_stats_from_datafiles(dataset)
-
-    sample_stats_table = _format_read_number_summary(fastqc_summary)
-
-    c['overall_stats'] = overall_stats
-    c['sample_stats_table'] = sample_stats_table
-
-    return HttpResponse(render_response_index(
-        request,
-        'view_project_dataset.html',
-        c)
-    )
+    @authz.dataset_access_required  # too complex # noqa
+    def get(self, request, *args, **kwargs):
+        """
 
 
-@authz.dataset_access_required
-def view_fastqc_reports_dataset(request, dataset_id):
-    """
+        :param request: a HTTP request object
+        :type request: :class:`django.http.HttpRequest`
+        :return: The Django response object
+        :rtype: :class:`django.http.HttpResponse`
+        """
 
-    This view should be used for Datasets using the FastQC reports schema, by
-    defining a mapping in settings.DATASET_VIEWS.
+        dataset_id = kwargs.get('dataset_id', None)
+        if dataset_id is None:
+            return return_response_error(request)
 
-    :param request: The Django HTTP request object
-    :type request: HTTPRequest
-    :param dataset_id: The ID of the Dataset to be viewed (primary key)
-    :type dataset_id: int
-    :return: The Django HTTP response object
-    :rtype: HttpResponse
-    """
-    c, dataset = prepare_project_dataset_view(request, dataset_id)
+        dataset = Dataset.objects.get(id=dataset_id)
+        if not dataset:
+            return return_response_not_found(request)
 
-    fastqc_summary = c.get('fastqc_summary', None)
-    if fastqc_summary:
-        fastqc_table_json, fastqc_table_headers = \
-            _format_bootstrap_table_json(fastqc_summary, dataset_id)
-        c['fastqc_table_json'] = fastqc_table_json
-        c['fastqc_table_headers'] = fastqc_table_headers
+        c = self.get_context_data(request, dataset, **kwargs)
 
-    return HttpResponse(render_response_index(
-        request,
-        'view_project_dataset.html',
-        c)
-    )
+        template_name = kwargs.get('template_name', None)
+        if template_name is None:
+            template_name = self.template_name
+
+        return HttpResponse(render_response_index(
+                request,
+                template_name,
+                c)
+        )
 
 
-def prepare_project_dataset_view(request, dataset_id):
-    """
-    Prepares the basic dictionary template for a 'Project' Dataset
-    and associated information, and the Dataset instance.
-    Caller of this method will typically add or override various
-    values before returning their own HttpResponse (and template).
-
-    Views using this method show the dataset, its metadata and a list of
-    associated files with the option to show metadata of each file and ways
-    to download those files.
-
-    :param request: The Django HTTP request object
-    :type request: HTTPRequest
-    :param dataset_id: The ID of the Dataset to be viewed (primary key)
-    :type dataset_id: int
-    :return: The template dictionary and Dataset model instance
-    :rtype: (dict, tardis.tardis_portal.Dataset)
-    """
-    dataset = Dataset.objects.get(id=dataset_id)
-
-    def get_datafiles_page():
-        # pagination was removed by someone in the interface but not here.
-        # need to fix.
-        pgresults = 100
-
-        paginator = Paginator(dataset.datafile_set.all(), pgresults)
-
-        try:
-            page = int(request.GET.get('page', '1'))
-        except ValueError:
-            page = 1
-
-        # If page request (9999) is out of range, deliver last page of results.
-        try:
-            return paginator.page(page)
-        except (EmptyPage, InvalidPage):
-            return paginator.page(paginator.num_pages)
-
-    upload_method = getattr(settings, "UPLOAD_METHOD", False)
-
-    fastqc_summary = _get_fastqc_json_parameter(dataset)
-
-    fastqc_version = ''
-    if fastqc_summary:
-        fastqc_version = fastqc_summary.get('fastqc_version', '')
-
-    c = {
-        'dataset': dataset,
-        'datafiles': get_datafiles_page(),
-        'parametersets': dataset.getParameterSets()
-            .exclude(schema__hidden=True),
-        'has_download_permissions':
-            authz.has_dataset_download_access(request, dataset_id),
-        'has_write_permissions':
-            authz.has_dataset_write(request, dataset_id),
-        'from_experiment':
-            get_experiment_referer(request, dataset_id),
-        'other_experiments':
-            authz.get_accessible_experiments_for_dataset(request, dataset_id),
-        'upload_method': upload_method,
-        'fastqc_version': fastqc_version,
-        'fastqc_summary': fastqc_summary,
-    }
-    _add_protocols_and_organizations(request, dataset, c)
-
-    return c, dataset
+class FastqcDatasetView(FastqDatasetView):
+    pass
 
 
 class SequencingFacilityIndexView(IndexView):
@@ -455,7 +401,7 @@ class SequencingFacilityIndexView(IndexView):
 
         if request.user.is_authenticated():
             private_experiments = Experiment.safe.owned_and_shared(
-                    request.user).order_by('-update_time')
+                    request.user).order_by('-end_time')
             runs = private_experiments.filter(
                     experimentparameterset__schema__subtype=
                     'illumina-sequencing-run',
@@ -483,5 +429,14 @@ class SequencingFacilityIndexView(IndexView):
                                                   self.template_name, c))
 
 
-def index(request, *args, **kwargs):
-    return class_to_view(SequencingFacilityIndexView, request, *args, **kwargs)
+@authz.dataset_access_required
+def view_fastqc_html_report(request, dataset_id=None, filename=None):
+    # NOTE: the argument dataset_id must be called dataset_id
+    # for the authz decorator to work (since it's treated as a
+    # named keyword arg)
+
+    # dataset = Dataset.objects.get(id=fastqc_dataset_id)
+    datafile = DataFile.objects.filter(filename__exact=filename,
+                                       dataset__id=dataset_id).get()
+
+    return view_datafile(request, datafile.id)

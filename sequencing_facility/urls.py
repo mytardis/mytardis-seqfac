@@ -12,5 +12,5 @@ urlpatterns = patterns('',
     #     'tardis.apps.sequencing_facility.views.view_html_result_file'),
 
     url(r'^report/(?P<dataset_id>\d+)/(?P<filename>.*)$',
-        'tardis.apps.sequencing_facility.views.view_fastqc_report'),
+        'tardis.apps.sequencing_facility.views.view_fastqc_html_report'),
 )
