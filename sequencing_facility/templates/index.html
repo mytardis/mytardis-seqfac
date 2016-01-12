@@ -1,6 +1,7 @@
 {% extends "tardis_portal/portal_template.html" %}
 {% load static from staticfiles %}
 {% load experiment_tags %}
+{% load sequencing_facility_tags %}
 {% load experimentstats %}
 {% load bleach_tag %}
 
@@ -47,7 +48,7 @@
 			{{ exp|experiment_datasets_badge }}
 		      </li>
 		      <li class="pull-right">
-			{{ exp|experiment_last_updated_badge }}
+			{{ exp|experiment_end_time_badge }}
 		      </li>
 		    </ul>
 		    <small>
@@ -136,7 +137,7 @@
 		  {{ exp|experiment_datasets_badge }}
 		</li>
 		<li class="pull-right">
-		  {{ exp|experiment_last_updated_badge }}
+		  {{ exp|experiment_end_time_badge }}
 		</li>
 	      </ul>
 	      <small>
