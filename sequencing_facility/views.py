@@ -345,42 +345,57 @@ class FastqcDatasetView(FastqDatasetView):
     pass
 
 
+def _get_experiments_by_schema(schema_subtype, user, order_by='-end_time'):
+    private_experiments = Experiment.safe.owned_and_shared(
+            user).order_by(order_by)
+
+    with_subtype = private_experiments.filter(
+            experimentparameterset__schema__subtype=
+            schema_subtype,
+            experimentparameterset__schema__type=
+            Schema.EXPERIMENT,
+    )
+
+    return with_subtype
+
+
+def _get_projects_for_run(run, user):
+
+    projects_in_run = _get_experiments_by_schema(
+            'demultiplexed-samples', user).filter(
+            experimentparameterset__experimentparameter__name__name__exact=
+            'run_experiment',
+            experimentparameterset__experimentparameter__link_id=run.id,
+    )
+
+    # An alternative to matching based on the linked
+    # run_experiment is to match based on run_id, but
+    # it assumes that run_id is always unique and this
+    # isn't strictly the case for users that can see
+    # 'trashed' experiments (eg admins)
+
+    # paramset = run.experimentparameterset_set.filter(
+    #        schema__subtype='illumina-sequencing-run',
+    #        schema__type=Schema.EXPERIMENT).get()
+    # run_id = paramset.get_param('run_id').get()
+
+    # projects_in_run = Experiment.safe.owned_and_shared(
+    #         request.user).filter(
+    #         experimentparameterset__schema__subtype=
+    #         'demultiplexed-samples',
+    #         experimentparameterset__schema__type=
+    #         Schema.EXPERIMENT,
+    #         experimentparameterset__experimentparameter__name__name__exact=
+    #         'run_id',
+    #         experimentparameterset__experimentparameter__string_value__exact=
+    #         run_id,
+    # )
+
+    return projects_in_run
+
+
 class SequencingFacilityIndexView(IndexView):
     template_name = 'index.html'
-
-    def get_projects_for_run(self, user, run):
-        projects_in_run = Experiment.safe.owned_and_shared(user).filter(
-                experimentparameterset__schema__subtype='demultiplexed-samples',
-                experimentparameterset__schema__type=Schema.EXPERIMENT,
-                experimentparameterset__experimentparameter__name__name__exact=
-                'run_experiment',
-                experimentparameterset__experimentparameter__link_id=run.id,
-        )
-
-        # An alternative to matching based on the linked
-        # run_experiment is to match based on run_id, but
-        # it assumes that run_id is always unique and this
-        # isn't strictly the case for users that can see
-        # 'trashed' experiments (eg admins)
-
-        # paramset = run.experimentparameterset_set.filter(
-        #        schema__subtype='illumina-sequencing-run',
-        #        schema__type=Schema.EXPERIMENT).get()
-        # run_id = paramset.get_param('run_id').get()
-
-        # projects_in_run = Experiment.safe.owned_and_shared(
-        #         request.user).filter(
-        #         experimentparameterset__schema__subtype=
-        #         'demultiplexed-samples',
-        #         experimentparameterset__schema__type=
-        #         Schema.EXPERIMENT,
-        #         experimentparameterset__experimentparameter__name__name__exact=
-        #         'run_id',
-        #         experimentparameterset__experimentparameter__string_value__exact=
-        #         run_id,
-        # )
-
-        return projects_in_run
 
     @use_rapid_connect
     def get_context_data(self, request, **kwargs):
@@ -400,20 +415,13 @@ class SequencingFacilityIndexView(IndexView):
         c['private_experiments'] = None
 
         if request.user.is_authenticated():
-            private_experiments = Experiment.safe.owned_and_shared(
-                    request.user).order_by('-end_time')
-            runs = private_experiments.filter(
-                    experimentparameterset__schema__subtype=
-                    'illumina-sequencing-run',
-                    experimentparameterset__schema__type=
-                    Schema.EXPERIMENT,
-            )
+            runs = _get_experiments_by_schema('illumina-sequencing-run',
+                                              request.user)
 
-            # private_experiments = c.get('private_experiments', [])
             run_expts = []
             for run in runs[:limit]:
                 if run:
-                    run.projects = self.get_projects_for_run(request.user, run)
+                    run.projects = _get_projects_for_run(run, request.user)
                     run_expts.append(run)
 
             c['private_experiments'] = run_expts
