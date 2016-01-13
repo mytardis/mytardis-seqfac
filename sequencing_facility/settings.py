@@ -1,6 +1,8 @@
 NAME = 'Sequencing Facility'
 SITE_TITLE = 'Sequencing Facility'
 
+FACILITY_MANAGER_GROUPS = ['mhtp-facility-managers']
+
 INDEX_VIEWS = {1: 'tardis.apps.sequencing_facility.views.'
                   'SequencingFacilityIndexView'}
 

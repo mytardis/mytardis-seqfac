@@ -394,6 +394,20 @@ def _get_projects_for_run(run, user):
     return projects_in_run
 
 
+def _is_in_group(user, group_names):
+    """
+    Returns True if a given user is a member of one or more groups.
+
+    :param user: The User object
+    :type user: django.User
+    :param group_names: A list of group names
+    :type group_names: list[str]
+    :return: Returns True if the user is in at least one of the named groups
+    :rtype: bool
+    """
+    return user.groups.filter(name__in=group_names).exists()
+
+
 class SequencingFacilityIndexView(IndexView):
     template_name = 'index.html'
 
@@ -414,15 +428,24 @@ class SequencingFacilityIndexView(IndexView):
         c = {}
         c['private_experiments'] = None
 
+        facility_manager_groups = getattr(settings,
+                                         'FACILITY_MANAGER_GROUPS',
+                                         ['mhtp-facility-managers'])
+        run_expts = []
         if request.user.is_authenticated():
-            runs = _get_experiments_by_schema('illumina-sequencing-run',
-                                              request.user)
+            if _is_in_group(request.user, facility_manager_groups):
+                runs = _get_experiments_by_schema('illumina-sequencing-run',
+                                                  request.user)
 
-            run_expts = []
-            for run in runs[:limit]:
-                if run:
-                    run.projects = _get_projects_for_run(run, request.user)
-                    run_expts.append(run)
+                for run in runs[:limit]:
+                    if run:
+                        run.projects = _get_projects_for_run(run, request.user)
+                        run_expts.append(run)
+
+            else:
+                runs = _get_experiments_by_schema('demultiplexed-samples',
+                                                  request.user)
+                run_expts = runs
 
             c['private_experiments'] = run_expts
 
