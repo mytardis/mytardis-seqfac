@@ -35,7 +35,7 @@
       "immutable": true
     }
   },
-    {
+  {
     "pk": null,
     "model": "tardis_portal.schema",
     "fields": {
@@ -84,10 +84,18 @@
     }
   },
 
-
-
-
-
+  {
+    "pk": null,
+    "model": "tardis_portal.schema",
+    "fields": {
+      "hidden": false,
+      "name": "Illumia run config and log files",
+      "namespace": "http://www.tardis.edu.au/schemas/ngs/run/illumina/config",
+      "immutable": true,
+      "subtype": "illumina-run-config",
+      "type": 2
+    }
+  },
 
   {
     "pk": null,
@@ -197,7 +205,7 @@
       ]
     }
   },
-    {
+  {
     "pk": null,
     "model": "tardis_portal.parametername",
     "fields": {
@@ -233,7 +241,7 @@
       ]
     }
   },
- {
+  {
     "pk": null,
     "model": "tardis_portal.parametername",
     "fields": {
@@ -251,7 +259,7 @@
       ]
     }
   },
- {
+  {
     "pk": null,
     "model": "tardis_portal.parametername",
     "fields": {
@@ -269,11 +277,7 @@
       ]
     }
   },
-
-
-
-
-   {
+  {
     "pk": null,
     "model": "tardis_portal.parametername",
     "fields": {
@@ -399,7 +403,7 @@
       ]
     }
   },
-    {
+  {
     "pk": null,
     "model": "tardis_portal.parametername",
     "fields": {
@@ -435,7 +439,7 @@
       ]
     }
   },
- {
+  {
     "pk": null,
     "model": "tardis_portal.parametername",
     "fields": {
@@ -453,7 +457,7 @@
       ]
     }
   },
- {
+  {
     "pk": null,
     "model": "tardis_portal.parametername",
     "fields": {
@@ -471,12 +475,7 @@
       ]
     }
   },
-
-
-
-
-
-   {
+  {
     "pk": null,
     "model": "tardis_portal.parametername",
     "fields": {
@@ -638,7 +637,7 @@
       ]
     }
   },
-    {
+  {
     "pk": null,
     "model": "tardis_portal.parametername",
     "fields": {
@@ -674,7 +673,7 @@
       ]
     }
   },
- {
+  {
     "pk": null,
     "model": "tardis_portal.parametername",
     "fields": {
@@ -692,10 +691,6 @@
       ]
     }
   },
-
-
-
-
   {
     "pk": null,
     "model": "tardis_portal.parametername",
@@ -768,10 +763,6 @@
       ]
     }
   },
-
-
-
-
   {
     "pk": null,
     "model": "tardis_portal.parametername",
@@ -808,13 +799,6 @@
       ]
     }
   },
-
-
-
-
-
-
-
   {
     "pk": null,
     "model": "tardis_portal.parametername",
@@ -887,7 +871,7 @@
       ]
     }
   },
-    {
+  {
     "pk": null,
     "model": "tardis_portal.parametername",
     "fields": {
@@ -1085,10 +1069,6 @@
       ]
     }
   },
-
-
-
-
   {
     "pk": null,
     "model": "tardis_portal.parametername",
@@ -1159,6 +1139,24 @@
       "schema": [
         "http://www.tardis.edu.au/schemas/ngs/file/fastqc"
       ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "full_name": "Run ID",
+      "comparison_type": 1,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/run/illumina/config"
+      ],
+      "name": "run_id",
+      "data_type": 2,
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "is_searchable": true,
+      "choices": ""
     }
   }
 ]
