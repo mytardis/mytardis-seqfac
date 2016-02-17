@@ -152,4 +152,5 @@ class ObjectACLAppResource(tardis_api.ObjectACLResource):
             'entityId': ('exact', ),
             'object_id': ('exact', ),
             'content_type': ('exact', ),
+            'aclOwnershipType': ('exact', ),
         }
