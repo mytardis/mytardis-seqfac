@@ -299,6 +299,24 @@
     "pk": null,
     "model": "tardis_portal.parametername",
     "fields": {
+      "name": "project_id",
+      "data_type": 2,
+      "is_searchable": true,
+      "choices": "",
+      "comparison_type": 1,
+      "full_name": "Project ID",
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/project"
+      ]
+    }
+  },
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
       "name": "run_experiment",
       "data_type": 4,
       "is_searchable": true,
