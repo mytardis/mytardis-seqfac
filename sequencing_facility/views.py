@@ -5,7 +5,7 @@ import json
 from django.conf import settings
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.http import HttpResponseRedirect, HttpResponse, \
-    HttpResponseForbidden, HttpResponseNotFound
+    HttpResponseForbidden, HttpResponseNotFound, JsonResponse
 from django.utils.text import slugify
 
 from tardis.tardis_portal.views.pages import IndexView, DatasetView, \
@@ -471,3 +471,8 @@ def view_fastqc_html_report(request, dataset_id=None, filename=None):
                                        dataset__id=dataset_id).get()
 
     return view_datafile(request, datafile.id)
+
+
+def get_version_json(request):
+    from . import __version__
+    return JsonResponse({'version': __version__})

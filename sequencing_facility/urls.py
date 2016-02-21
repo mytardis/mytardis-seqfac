@@ -13,4 +13,7 @@ urlpatterns = patterns('',
 
     url(r'^report/(?P<dataset_id>\d+)/(?P<filename>.*)$',
         'tardis.apps.sequencing_facility.views.view_fastqc_html_report'),
+
+    url(r'^version$',
+        'tardis.apps.sequencing_facility.views.get_version_json'),
 )
