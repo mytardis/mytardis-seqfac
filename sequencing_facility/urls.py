@@ -14,6 +14,11 @@ urlpatterns = patterns('',
     url(r'^report/(?P<dataset_id>\d+)/(?P<filename>.*)$',
         'tardis.apps.sequencing_facility.views.view_fastqc_html_report'),
 
-    url(r'^version$',
-        'tardis.apps.sequencing_facility.views.get_version_json'),
+
+    # custom (non-tastypie) API endpoints
+    url(r'^api/version$',
+        'tardis.apps.sequencing_facility.custom_api.get_version_json'),
+
+    url(r'^api/trash_experiment/(?P<experiment_id>\d+)$',
+        'tardis.apps.sequencing_facility.custom_api.trash_experiment'),
 )
