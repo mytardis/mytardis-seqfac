@@ -154,5 +154,9 @@ def trash_experiment(request, experiment_id=None):
     # remove all the non-trashman/trashcan ACLs
     [acl.delete() for acl in acls_to_remove]
 
+    # ensure experiment is not publicly accessible
+    expt.public_access = Experiment.PUBLIC_ACCESS_NONE
+    expt.save()
+
     return jsend_success_response(
         'Experiment %s moved to trash' % experiment_id, {'id': experiment_id})
