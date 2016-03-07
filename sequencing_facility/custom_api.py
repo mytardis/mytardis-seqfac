@@ -6,6 +6,7 @@ from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest, HttpResponseRedirect, HttpResponse, \
     HttpResponseForbidden, HttpResponseNotFound, JsonResponse, \
     HttpResponseNotAllowed
+from django.views.decorators.csrf import csrf_exempt
 
 from tardis.tardis_portal.auth import decorators as authz
 from tardis.tardis_portal.models import Experiment, ExperimentParameter, \
@@ -67,6 +68,7 @@ def get_version_json(request):
 
 
 # @authz.experiment_access_required  # won't do tastypie API key auth ?
+@csrf_exempt  # so we can use the PUT method without a csrf_token
 @require_authentication
 def trash_experiment(request, experiment_id=None):
 
@@ -75,7 +77,7 @@ def trash_experiment(request, experiment_id=None):
     #       However, it appears the CSRF middleware is blocking POST, DELETE
     #       and PUT requests without a csrf_token ? (which we don't have in this
     #       context)
-    if request.method != 'GET':
+    if request.method != 'PUT':
         raise HttpResponseNotAllowed()
 
     try:
@@ -104,13 +106,13 @@ def trash_experiment(request, experiment_id=None):
         trashman = User.objects.filter(username=trash_username)[0]
     except IndexError as ex:
         logger.error('Cannot find ID for trash user: %s (Does it exist ? Are '
-                     'ingestor user permissions correct ?)' % trashman)
+                     'ingestor user permissions correct ?)' % trash_username)
         raise ex
     try:
         trashcan = Group.objects.filter(name=trash_group_name)[0]
     except IndexError as ex:
         logger.error('Cannot find ID for trash group: %s (Does it exist ? Are '
-                     'ingestor user permissions correct ?)' % trashcan)
+                     'ingestor user permissions correct ?)' % trash_group_name)
         raise ex
 
     acls_to_remove = []
