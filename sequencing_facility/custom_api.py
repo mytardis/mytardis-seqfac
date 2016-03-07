@@ -72,11 +72,6 @@ def get_version_json(request):
 @require_authentication
 def trash_experiment(request, experiment_id=None):
 
-    # TODO: This should actually be a DELETE, or maybe a PUT (since technically
-    #       it's only a logical delete, not a real database delete ?)
-    #       However, it appears the CSRF middleware is blocking POST, DELETE
-    #       and PUT requests without a csrf_token ? (which we don't have in this
-    #       context)
     if request.method != 'PUT':
         raise HttpResponseNotAllowed()
 
@@ -101,7 +96,6 @@ def trash_experiment(request, experiment_id=None):
     trash_username = getattr(settings, 'TRASH_USERNAME', '__trashman__')
     trash_group_name = getattr(settings, 'TRASH_GROUP_NAME', '__trashcan__')
 
-    # TODO: Should we just create trashman/trashcan here if they are missing ?
     try:
         trashman = User.objects.filter(username=trash_username)[0]
     except IndexError as ex:
