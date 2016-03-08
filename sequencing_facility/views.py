@@ -430,8 +430,8 @@ class SequencingFacilityIndexView(IndexView):
         c['private_experiments'] = None
 
         facility_manager_groups = getattr(settings,
-                                         'FACILITY_MANAGER_GROUPS',
-                                         ['mhtp-facility-managers'])
+                                          'FACILITY_MANAGER_GROUPS',
+                                          ['mhtp-facility-managers'])
         run_expts = []
         if request.user.is_authenticated():
             if _is_in_group(request.user, facility_manager_groups):

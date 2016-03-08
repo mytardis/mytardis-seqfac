@@ -11,7 +11,8 @@
     <thead>
     <tr>
         {% for thead in sample_stats_table.thead %}
-            <th class="col-xs-1">{{ thead }}</th>
+            <th class="col-xs-1"
+                data-sortable="true">{{ thead }}</th>
         {% endfor %}
     </tr>
     </thead>

@@ -19,6 +19,7 @@
             id="sample_name"
             data-switchable="false"
             data-visible="true"
+            data-sortable="true"
             data-height="500">
             Sample
         </th>
@@ -96,7 +97,7 @@
             return el.html();
         }
         if (strContains(v, 'WARN')) {
-            var icon = '<i class="icon-warning-sign" style="color:#faa732;font-size:200%;"></i>';
+            var icon = '<i class="icon-warning-sign" style="color:#C0C0C0;font-size:200%;"></i>';
             //var icon = '<span class="label label-warning">WARN</span>';
             var el = $('<a></a>');
             el.html(v);
@@ -104,7 +105,7 @@
             return el.html();
         }
         if (strContains(v, 'FAIL')) {
-            var icon = '<i class="icon-remove-sign" style="color:#dd514c;font-size:200%;"></i>';
+            var icon = '<i class="icon-remove-sign" style="color:#C0C0C0;font-size:200%;"></i>';
             //var icon = '<span class="label label-important">FAIL</span>';
             var el = $('<a></a>');
             el.html(v);
