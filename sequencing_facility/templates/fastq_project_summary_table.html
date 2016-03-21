@@ -20,7 +20,8 @@
             data-switchable="false"
             data-visible="true"
             data-sortable="true"
-            data-height="500">
+            data-height="500"
+            data-formatter="tinyFormatter">
             Sample
         </th>
         {% for field_id, description in fastqc_table_headers %}
@@ -54,6 +55,10 @@
             data: fastqc_table_data
         });
     });
+
+    function tinyFormatter(value) {
+        return '<span style="font-size: x-small;">' + value + '</span>';
+    }
 
     function strContains(str, subStr) {
         return str.indexOf(subStr) > -1;

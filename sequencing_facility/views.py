@@ -63,7 +63,9 @@ def _format_bootstrap_table_json(fastqc_summary, fastqc_dataset_id):
     fastqc_data = []
     for sample in fastqc_summary['samples']:
         sample_name = sample['sample_name']
-        sample_id_text = sample_name + " (R%s)" % (sample['read'])
+        sample_id_text = '%s<br/>(L%s, R%s)' % (sample_name,
+                                                sample['lane'],
+                                                sample['read'])
         qc_checks = sample['qc_checks']
         fastqc_filename = sample.get('fastqc_report_filename', None)
         if fastqc_filename:
