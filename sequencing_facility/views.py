@@ -27,20 +27,25 @@ from tardis.tardis_portal.download import view_datafile
 logger = logging.getLogger(__name__)
 
 
-def _get_paramset_by_subtype(model, schema_subtype):
+def _get_paramset_by_subtype(model, schema_subtype, default=None):
     for param_set in model.getParameterSets():
         if param_set.schema.subtype == schema_subtype:
             return param_set
 
-    return None
+    return default
 
 
-def _get_param_value(model, param_name, schema_subtype):
+def _get_param_value(model, param_name, schema_subtype, default=None):
     param_set = _get_paramset_by_subtype(model, schema_subtype)
     if param_set:
-        return param_set.get_param(param_name)
+        try:
+            return param_set.get_param(param_name, value=True)
+        except (ExperimentParameter.DoesNotExist,
+                DatasetParameter.DoesNotExist,
+                DataFileParameter.DoesNotExist):
+            return default
     else:
-        return None
+        return default
 
 
 def _format_bootstrap_table_json(fastqc_summary, fastqc_dataset_id):
@@ -256,7 +261,11 @@ class FastqDatasetView(DatasetView):
                                                 'nucleotide-raw-reads-dataset')
 
         if fq_param_set:
-            fastqc_link = fq_param_set.get_param('fastqc_dataset')
+            try:
+                fastqc_link = fq_param_set.get_param('fastqc_dataset')
+            except DatasetParameter.DoesNotExist:
+                return c
+
             if fastqc_link.link_id:
                 fastqc_dataset_id = fastqc_link.link_id
             else:

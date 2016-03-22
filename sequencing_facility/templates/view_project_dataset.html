@@ -486,6 +486,7 @@ $('#modal-metadata .submit-button').live('click', function() {
     {% block dataset_content_preview %}
     <div class="row-fluid" style="margin-bottom: 20px">
     <!-- <h3>Summary</h3> -->
+    {% if overall_stats or sample_stats_table or fastqc_table_json %}
     <div class="info-box">
 
     <br/>
@@ -556,6 +557,7 @@ $('#modal-metadata .submit-button').live('click', function() {
         </div>
         {% endif %}
     </div>
+    {% endif %}
     {% endblock dataset_content_preview %}
     <div id="metadata-pane-datafile" class="row-fluid">
        <h3>Datafile Information</h3>
