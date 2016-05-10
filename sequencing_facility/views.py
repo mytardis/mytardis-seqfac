@@ -354,6 +354,8 @@ class FastqDatasetView(DatasetView):
 
 
 class FastqcDatasetView(FastqDatasetView):
+    # FastQC dataset views currently just use the same logic as FastQ views
+    #
     pass
 
 
