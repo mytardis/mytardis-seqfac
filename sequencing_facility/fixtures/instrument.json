@@ -6,5 +6,21 @@
     },
     "model": "tardis_portal.instrument",
     "pk": null
+  },
+  {
+    "fields": {
+      "name": "HiSeq3000 J00154",
+      "facility": 1
+    },
+    "model": "tardis_portal.instrument",
+    "pk": null
+  },
+  {
+    "fields": {
+      "name": "MiSeq M04416",
+      "facility": 1
+    },
+    "model": "tardis_portal.instrument",
+    "pk": null
   }
 ]
