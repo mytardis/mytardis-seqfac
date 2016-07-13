@@ -21,4 +21,7 @@ urlpatterns = patterns('',
 
     url(r'^api/trash_experiment/(?P<experiment_id>\d+)$',
         'tardis.apps.sequencing_facility.custom_api.trash_experiment'),
+
+    url(r'^api/_delete_all_trashed/$',
+        'tardis.apps.sequencing_facility.custom_api._delete_all_trashed'),
 )
