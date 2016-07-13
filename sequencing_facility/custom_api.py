@@ -1,12 +1,14 @@
 import logging
 from django.conf import settings
-from django.contrib.auth.models import User, Group
+from django.db import transaction
+from django.contrib.auth.models import User, Group, ContentType
 from django.core.exceptions import PermissionDenied
 
 from django.http import HttpRequest, HttpResponseRedirect, HttpResponse, \
     HttpResponseForbidden, HttpResponseNotFound, JsonResponse, \
-    HttpResponseNotAllowed
+    HttpResponseNotAllowed, HttpResponseServerError
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import user_passes_test
 
 from tardis.tardis_portal.auth import decorators as authz
 from tardis.tardis_portal.models import Experiment, ExperimentParameter, \
@@ -16,6 +18,8 @@ from tardis.tardis_portal.models import Experiment, ExperimentParameter, \
     License, UserProfile, UserAuthentication, Token
 
 from tardis.tardis_portal.api import MyTardisAuthentication
+
+import tasks
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +69,88 @@ def jsend_fail_response(message, status_code, data=None):
 def get_version_json(request):
     from . import __version__
     return JsonResponse({'version': __version__})
+
+
+def stats_ingestion_timeline(include_titles=False, as_csv=False):
+    """
+    Returns JSON or CSV summarizing title, number and size of files in all runs.
+    Could be used to render a Javascript timeline of ingestion.
+
+    (eg, like this: https://plot.ly/javascript/range-slider/ )
+
+    :param include_titles:
+    :type include_titles:
+    :param as_csv:
+    :type as_csv:
+    :return:
+    :rtype:
+    """
+    import json
+    from datetime import datetime
+    import csv
+    from StringIO import StringIO
+    from .views import _get_paramset_by_subtype
+
+    # custom datetime formatter, vanilla json.dumps can't serialize datetimes
+    class DateTimeEncoder(json.JSONEncoder):
+        def default(self, o):
+            if isinstance(o, datetime):
+                return o.isoformat()
+
+            return json.JSONEncoder.default(self, o)
+
+    trash_username = '__trashman__'
+
+    runs = []
+    projects = []
+    datafile_size_cum = 0
+    datafile_count_cum = 0
+    for e in Experiment.objects.all().order_by('end_time'):
+        trashed = False
+        for user in e.get_owners():
+            if user.username == trash_username:
+                trashed = True
+                break
+
+        if not trashed:
+            datafiles_size = e.get_size()
+            datafiles_count = e.get_datafiles().count()
+            datafile_size_cum += datafiles_size
+            datafile_count_cum += datafiles_count
+
+            title = ''
+            if include_titles:
+                title = e.title
+
+            row = (e.end_time, title,
+                   datafiles_count, datafiles_size,
+                   datafile_count_cum, datafile_size_cum)
+
+            if _get_paramset_by_subtype(e, 'illumina-sequencing-run'):
+                runs.append(row)
+            if _get_paramset_by_subtype(e, 'demultiplexed-samples'):
+                projects.append(row)
+
+    if as_csv:
+        header = 'Date,Title,Files,Size,Files(Cumulative),Size(Cumulative)'
+        run_csv = StringIO()
+        run_csvwriter = csv.writer(run_csv, delimiter=',', quotechar='"',
+                                   quoting=csv.QUOTE_NONNUMERIC)
+        run_csvwriter.writerow(header.split(','))
+        for r in runs:
+            run_csvwriter.writerow(r)
+
+        project_csv = StringIO()
+        project_csvwriter = csv.writer(run_csv, delimiter=',', quotechar='"',
+                                       quoting=csv.QUOTE_NONNUMERIC)
+        project_csvwriter.writerow(header.split(','))
+        for p in projects:
+            project_csvwriter.writerow(p)
+
+        return run_csv.getvalue(), project_csv.getvalue()
+    else:
+        jdict = {'runs': runs, 'projects': projects}
+        return json.dumps(jdict, cls=DateTimeEncoder)
 
 
 # @authz.experiment_access_required  # won't do tastypie API key auth ?
@@ -156,3 +242,19 @@ def trash_experiment(request, experiment_id=None):
 
     return jsend_success_response(
         'Experiment %s moved to trash' % experiment_id, {'id': experiment_id})
+
+
+@require_authentication
+@user_passes_test(lambda u: u.is_superuser)
+def _delete_all_trashed(request):
+    try:
+        # tasks.delete_all_trashed_task.delay()
+        tasks.delete_all_trashed_task()
+
+    except Exception as e:
+        return jsend_fail_response('Delete operation failed. '
+                                   'Some trashed experiments were not deleted.',
+                                   500, {})
+
+    return jsend_success_response('Queued trashed Experiments for deletion',
+                                  200, {})
