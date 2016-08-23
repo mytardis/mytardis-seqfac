@@ -15,13 +15,26 @@ MyTardis Sequencing Facility in a production setting.
 Install MyTardis
 ----------------
 
+Refer to the `MyTardis installation documentation <https://mytardis.readthedocs.io/en/develop/admin/install.html>`_.
 
 Install the mytardis-seqfac app
 -------------------------------
 
+Install the ``sequencing_facility`` app in the same virtual environment as
+your MyTardis server.
+
+``pip install -U git+https://github.com/mytardis/mytardis-seqfac.git#egg=sequencing-facility``
+
+Add the app ``sequencing_facility`` to your ``INSTALLED_APPS`` in MyTardis/Django settings.
+
+eg, ``INSTALLED_APPS += ('sequencing_facility',)``
+
+The ``sequencing_facility`` app comes with it's own `default settings <https://github.com/mytardis/mytardis-seqfac/blob/master/sequencing_facility/settings.py>`_.
+
 
 Edit the mytardis-seqfac settings.py
 ------------------------------------
+
 
 
 Create required database records from fixtures
