@@ -1,13 +1,8 @@
 
-# footer text
-SPONSORED_TEXT = None
-
 # For S3-compatible Object Stores, setup access_key, secret_key
 # bucket_name, calling_format, host and port as StorageBoxOptions
 
 NAME = 'Sequencing Facility'
-
-SITE_TITLE = 'Sequencing Facility'
 
 INDEX_VIEWS = {1: 'tardis.apps.sequencing_facility.views.'
                   'SequencingFacilityIndexView'}
