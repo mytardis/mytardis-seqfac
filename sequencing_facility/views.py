@@ -42,10 +42,34 @@ def _get_param_value(model, param_name, schema_subtype, default=None):
             return param_set.get_param(param_name, value=True)
         except (ExperimentParameter.DoesNotExist,
                 DatasetParameter.DoesNotExist,
-                DataFileParameter.DoesNotExist):
+                DatafileParameter.DoesNotExist):
             return default
     else:
         return default
+
+
+def _format_read_number(read, read_type=None):
+    """
+    Catch read values without a letter prefix (legacy format), convert
+    them to Rn format. This could be fixed by a database migration that
+    updates the JSON blobs.
+
+    :param read: The read number. May be eg 'R1', 'R2', 'I1', or
+                 the old format used previously, '1', '2', '3'
+                 (as string or int).
+    :type read: str | int
+    :return: The read number properly formatted for output - Rn or In.
+    :rtype: str
+    """
+    try:
+        read = int(read)
+        if read_type is None:
+            read_type = 'R'
+        read = '%s%s' % (read_type, read)
+    except ValueError:
+        # read is in the format 'Rn' or 'In', so just return it unmodified
+        pass
+    return read
 
 
 def _format_bootstrap_table_json(fastqc_summary, fastqc_dataset_id):
@@ -68,9 +92,13 @@ def _format_bootstrap_table_json(fastqc_summary, fastqc_dataset_id):
     fastqc_data = []
     for sample in fastqc_summary['samples']:
         sample_name = sample['sample_name']
-        sample_id_text = '%s<br/>(L%s, R%s)' % (sample_name,
-                                                sample['lane'],
-                                                sample['read'])
+
+        read = _format_read_number(sample['read'],
+                                   read_type=sample.get('read_type', None))
+
+        sample_id_text = '%s<br/>(L%s, %s)' % (sample_name,
+                                               sample['lane'],
+                                               read)
         qc_checks = sample['qc_checks']
         fastqc_filename = sample.get('fastqc_report_filename', None)
         if fastqc_filename:
@@ -193,7 +221,7 @@ def _get_project_stats_from_datafiles(dataset):
             'read_length_stddev': read_length_stddev}
 
 
-def _format_read_number_summary(fastqc_summary):
+def _format_read_count_summary(fastqc_summary):
     if not fastqc_summary or ('samples' not in fastqc_summary):
         return None
 
@@ -206,6 +234,10 @@ def _format_read_number_summary(fastqc_summary):
         extra_fields = ['sample_name', 'index', 'lane', 'read']
         for k in extra_fields:
             basic_stats[k] = sample[k]
+        basic_stats['read'] = _format_read_number(
+            basic_stats['read'],
+            read_type=sample.get('read_type', None))
+
         sample_stats_table['thead'] = extra_fields + sample_stats_table['thead']
 
         # modify the sample name for prettier HTML output (eg wrapping)
@@ -314,7 +346,7 @@ class FastqDatasetView(DatasetView):
         else:
             overall_stats = _get_project_stats_from_datafiles(dataset)
 
-        sample_stats_table = _format_read_number_summary(fastqc_summary)
+        sample_stats_table = _format_read_count_summary(fastqc_summary)
 
         c['overall_stats'] = overall_stats
         c['sample_stats_table'] = sample_stats_table
