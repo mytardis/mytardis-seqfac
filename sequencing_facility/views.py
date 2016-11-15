@@ -72,7 +72,8 @@ def _format_read_number(read, read_type=None):
     return read
 
 
-def _format_bootstrap_table_json(fastqc_summary, fastqc_dataset_id):
+def _format_bootstrap_table_json(fastqc_summary, fastqc_dataset_id,
+                                 skip_index_reads=True):
     """
     Unpack the datastructure representing a summary of
     FastQC results for all samples in the project and repackage it
@@ -92,6 +93,12 @@ def _format_bootstrap_table_json(fastqc_summary, fastqc_dataset_id):
     fastqc_data = []
     for sample in fastqc_summary['samples']:
         sample_name = sample['sample_name']
+
+        # just skip index reads in the table
+        if skip_index_reads and \
+                (sample.get('read_type', None) == 'I' or
+                 str(sample.get('read', '')).startswith('I')):
+            continue
 
         read = _format_read_number(sample['read'],
                                    read_type=sample.get('read_type', None))
