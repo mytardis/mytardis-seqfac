@@ -71,12 +71,19 @@ def get_version_json(request):
     return JsonResponse({'version': __version__})
 
 
-def stats_ingestion_timeline(include_titles=False, as_csv=False):
+@require_authentication
+@user_passes_test(lambda u: u.is_superuser)
+def stats_ingestion_timeline(request):
     """
     Returns JSON or CSV summarizing title, number and size of files in all runs.
     Could be used to render a Javascript timeline of ingestion.
 
     (eg, like this: https://plot.ly/javascript/range-slider/ )
+
+    Example URL for request:
+    /apps/sequencing-facility/api/_stats?format=json&include_titles
+
+    format may by `json` or `csv`.
 
     :param include_titles:
     :type include_titles:
@@ -100,6 +107,8 @@ def stats_ingestion_timeline(include_titles=False, as_csv=False):
             return json.JSONEncoder.default(self, o)
 
     trash_username = '__trashman__'
+    format = request.GET.get('format', 'json').lower().strip()
+    include_titles = ('include_titles' in request.GET)
 
     runs = []
     projects = []
@@ -131,7 +140,7 @@ def stats_ingestion_timeline(include_titles=False, as_csv=False):
             if _get_paramset_by_subtype(e, 'demultiplexed-samples'):
                 projects.append(row)
 
-    if as_csv:
+    if format == 'csv':
         header = 'Date,Title,Files,Size,Files(Cumulative),Size(Cumulative)'
         run_csv = StringIO()
         run_csvwriter = csv.writer(run_csv, delimiter=',', quotechar='"',
@@ -147,10 +156,11 @@ def stats_ingestion_timeline(include_titles=False, as_csv=False):
         for p in projects:
             project_csvwriter.writerow(p)
 
-        return run_csv.getvalue(), project_csv.getvalue()
+        return JsonResponse({'run_csv': run_csv.getvalue(),
+                             'project_csv': project_csv.getvalue()})
     else:
         jdict = {'runs': runs, 'projects': projects}
-        return json.dumps(jdict, cls=DateTimeEncoder)
+        return JsonResponse(json.loads(json.dumps(jdict, cls=DateTimeEncoder)))
 
 
 # @authz.experiment_access_required  # won't do tastypie API key auth ?
