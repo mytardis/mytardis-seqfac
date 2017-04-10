@@ -40,9 +40,23 @@ Edit the mytardis-seqfac settings.py
 Create required database records from fixtures
 ----------------------------------------------
 
-**TODO:** Pre-populating the database with models from fixtures.
-          Setting correct permissions on ingestor and facility manager user
+**TODO:** Setting correct permissions on ingestor and facility manager user
 
+The `mytardis-seqfac` repository contains example fixtures to populate the
+database with required schemas etc.
+
+In the MyTardis directory run:
+```
+python mytardis.py loaddata mytardis-seqfac/sequencing_facility/fixtures/sequencing_facility_schema.json
+python mytardis.py loaddata mytardis-seqfac/sequencing_facility/fixtures/licenses.json
+python mytardis.py loaddata mytardis-seqfac/sequencing_facility/fixtures/trash_user.json
+```
+
+The fixtures `instrument.json`, `facility.json`, `storage_boxes.json` and
+`ingestor_user.json` provided examples of objects required for a facility.
+
+These can be modified as needed and applied, or applied as-is and then
+modified in Django Admin.
 
 Install and configure the ingestion client
 ------------------------------------------
