@@ -15,5 +15,5 @@ Dependencies
   
 Python dependencies are installed from requirements.txt
 
-To ingest data, use the [mytardis_ngs_ingestor](https://github.com/mytardis/mytardis-seqfac) 
+To ingest data, use the [mytardis_ngs_ingestor](https://github.com/mytardis/mytardis_ngs_ingestor) 
 client.
