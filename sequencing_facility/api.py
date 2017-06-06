@@ -58,7 +58,7 @@ class ExperimentAppResource(tardis_api.ExperimentResource):
 
     def obj_get_list(self, bundle, **kwargs):
         """
-        Responds to queries for an experiment based on the existence
+        Responds to queries for a list of experiments based on the existence
         of a parameter with a particular value.
 
         HTTP GET query parameters are:
@@ -99,29 +99,29 @@ class ExperimentAppResource(tardis_api.ExperimentResource):
                 if pname.isDateTime():
                     parameter_type = 'datetime_range'
 
-            expt = []
+            expts = []
             filter_prefix = 'experimentparameterset__experimentparameter__'
             if parameter_type == 'string':
-                expts = Experiment.safe.all(bundle.request.user).filter(
+                expts.extend(Experiment.safe.all(bundle.request.user).filter(
                     **{'experimentparameterset__schema__namespace': namespace,
                        filter_prefix + 'name__name__exact': name,
-                       filter_prefix + 'string_value__exact': value}
+                       filter_prefix + 'string_value__exact': value})
                 )
             if parameter_type == 'numeric_range':
                 lower, upper = [float(v) for v in value.split(',')][:2]
-                expts = Experiment.safe.all(bundle.request.user).filter(
+                expts.extend(Experiment.safe.all(bundle.request.user).filter(
                     **{'experimentparameterset__schema__namespace': namespace,
                        filter_prefix + 'name__name__exact': name,
-                       filter_prefix + 'numeric_value__range': (lower, upper)}
+                       filter_prefix + 'numeric_value__range': (lower, upper)})
                 )
             if parameter_type == 'datetime_range':
                 import dateutil
                 start, end = [dateutil.parser.parse(v)
                               for v in value.split(',')][:2]
-                expts = Experiment.safe.all(bundle.request.user).filter(
+                expts.extend(Experiment.safe.all(bundle.request.user).filter(
                     **{'experimentparameterset__schema__namespace': namespace,
                        filter_prefix + 'name__name__exact': name,
-                       filter_prefix + 'datetime_value__range': (start, end)}
+                       filter_prefix + 'datetime_value__range': (start, end)})
                 )
 
             return expts
