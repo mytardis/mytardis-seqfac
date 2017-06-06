@@ -26,5 +26,5 @@ urlpatterns = patterns('',
         'sequencing_facility.custom_api._delete_all_trashed'),
 
     url(r'^api/_stats/$',
-         'sequencing_facility.custom_api.stats_ingestion_timeline'),
+        'sequencing_facility.custom_api.stats_ingestion_timeline'),
 )
