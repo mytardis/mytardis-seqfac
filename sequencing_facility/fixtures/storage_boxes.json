@@ -83,7 +83,18 @@
     "model": "tardis_portal.storagebox",
     "pk": 6
   },
-
+  {
+    "fields": {
+      "status": "online",
+      "description": "NeCTAR Volume for Clinical Genomics storage",
+      "django_storage_class": "tardis.tardis_portal.storage.MyTardisLocalFileSystemStorage",
+      "max_size": 703138037760,
+      "master_box": null,
+      "name": "mhtp-clinical"
+    },
+    "model": "tardis_portal.storagebox",
+    "pk": 9
+  },
 
 
   {
@@ -194,7 +205,16 @@
     "model": "tardis_portal.storageboxoption",
     "pk": 15
   },
-  
+  {
+    "fields": {
+      "value": "/data/clinical",
+      "value_type": "string",
+      "key": "location",
+      "storage_box": 9
+    },
+    "model": "tardis_portal.storageboxoption",
+    "pk": 18
+  },
 
 
   {
@@ -223,5 +243,14 @@
     },
     "model": "tardis_portal.storageboxattribute",
     "pk": 5
+  },
+  {
+    "fields": {
+      "value": "false",
+      "key": "can_delete",
+      "storage_box": 9
+    },
+    "model": "tardis_portal.storageboxattribute",
+    "pk": 8
   }
 ]
