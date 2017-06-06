@@ -99,6 +99,38 @@
 
   {
     "pk": null,
+    "model": "tardis_portal.schema",
+    "fields": {
+      "name": "Illumia run instrument files",
+      "namespace": "http://www.tardis.edu.au/schemas/ngs/run/illumina/files",
+      "subtype": "illumina-run-instrument-files",
+      "hidden": false,
+      "type": 2,
+      "immutable": true
+    }
+  },
+
+  {
+    "pk": null,
+    "model": "tardis_portal.parametername",
+    "fields": {
+      "full_name": "Run ID",
+      "comparison_type": 1,
+      "schema": [
+        "http://www.tardis.edu.au/schemas/ngs/run/illumina/files"
+      ],
+      "name": "run_id",
+      "data_type": 2,
+      "units": "",
+      "order": 9999,
+      "immutable": true,
+      "is_searchable": true,
+      "choices": ""
+    }
+  },
+
+  {
+    "pk": null,
     "model": "tardis_portal.parametername",
     "fields": {
       "name": "run_id",
