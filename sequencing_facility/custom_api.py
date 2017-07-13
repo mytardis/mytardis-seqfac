@@ -1,4 +1,5 @@
 import logging
+from os import path
 from django.conf import settings
 from django.db import transaction
 from django.contrib.auth.models import User, Group, ContentType
@@ -268,3 +269,73 @@ def _delete_all_trashed(request):
 
     return jsend_success_response('Queued trashed Experiments for deletion',
                                   200, {})
+
+
+@require_authentication
+@user_passes_test(lambda u: u.is_superuser)
+def switch_df_box(df_id, storage_box_name='vault'):
+    df = DataFile.objects.get(id=df_id)
+    dfo = df.file_objects.all()[0]
+    new_box = StorageBox.objects.filter(name=storage_box_name)[0]
+    dfo.storage_box = new_box
+    dfo.save()
+
+
+@require_authentication
+@user_passes_test(lambda u: u.is_superuser)
+def switch_expt_box(expt_id, from_box, to_box, reverify=False):
+    """
+    Changes the StorageBox for files in an experiment without triggering any
+    underlying file copy or move. The files should be copied/moved and verified manually
+    to the location of the next StorageBox.
+
+    Example:
+
+        switch_expt_box(345, 'illumina', 'vault', reverify=False)
+
+    """
+    new_box = StorageBox.objects.get(name=to_box)
+    expt = Experiment.objects.get(id=expt_id)
+    datafiles = expt.get_datafiles()
+    with transaction.atomic():
+        for df in datafiles:
+            dfo = df.get_preferred_dfo(verified_only=False)
+            if dfo.storage_box.name != from_box:
+                continue
+            dfo.storage_box = new_box
+            if not reverify:
+                # dfo.verified = True
+                # Hack to prevent automatic verification
+                dfo._initial_values = dfo._current_values
+            dfo.save(reverify=reverify)
+            # df.verify(reverify=reverify)
+
+
+@require_authentication
+@user_passes_test(lambda u: u.is_superuser)
+def populate_datafile_directory(expt_id, storage_box, force_update=False):
+    """
+    For DataFiles that were ingested without a value for the `directory` field,
+    take the base path from the associated DataFileObject.uri and use it as the
+    `directory` field.
+
+    Filters by StorageBox name.
+
+    Example:
+
+        populate_datafile_directory(347, 'illumina', force_update=True)
+
+    """
+    expt = Experiment.objects.get(id=expt_id)
+    datafiles = expt.get_datafiles()
+    with transaction.atomic():
+        for df in datafiles:
+            dfo = df.get_preferred_dfo(verified_only=False)
+            if dfo.storage_box.name != storage_box:
+                continue
+            # opt = dfo.storage_box.options.get(key='location')
+            location = dfo.uri
+            if not df.directory or force_update:
+                # print(path.dirname(location))
+                df.directory = path.dirname(location)
+                df.save()
