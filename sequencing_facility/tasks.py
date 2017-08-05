@@ -31,6 +31,7 @@ def delete_all_trashed_task():
                                        content_type=expt_ct,
                                        entityId=trashman_id)
     results = {'deleted': [], 'failed': [], 'exceptions': []}
+    expt_id = None
     for t in trashed:
         expt_id = t.object_id
         expt = Experiment.objects.get(id=expt_id)
@@ -51,6 +52,6 @@ def delete_all_trashed_task():
             results['failed'].append(expt_id)
             results['exceptions'].append(e)
             logger.error("Failed to delete trashed Experiment %s (%s)" %
-                         expt_id, e)
+                         (expt_id, e))
 
     return results
