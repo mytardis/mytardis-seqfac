@@ -151,7 +151,9 @@ def stats_ingestion_timeline(request):
             run_csvwriter.writerow(r)
 
         project_csv = StringIO()
-        project_csvwriter = csv.writer(run_csv, delimiter=',', quotechar='"',
+        project_csvwriter = csv.writer(project_csv,
+                                       delimiter=',',
+                                       quotechar='"',
                                        quoting=csv.QUOTE_NONNUMERIC)
         project_csvwriter.writerow(header.split(','))
         for p in projects:
